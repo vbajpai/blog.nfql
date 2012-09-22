@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Github Repositories</title>
+   <title>Installing and Running the Parser</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,12 +26,57 @@
 
     
 <div id="post">
-  <h1>Github Repositories</h1>
+  <h1>Installing and Running the Parser</h1>
   <p class="meta">
-    20 February 2012 
+    21 February 2012 
     
   </p>
-  <p><a href='https://github.com/vbajpai/nfql'>NFQL Repository &#8594;</a><br /><a href='https://github.com/vbajpai/mastersthesis'>Thesis Repository &#8594;</a></p>
+  <p>Install PyTables</p>
+
+<pre><code>$ brew install hdf5
+$ brew install lzo
+
+$ pip install numpy
+$ pip install numexpr
+$ pip install cython</code></pre>
+
+<p>Install Python Lex &amp; Yacc</p>
+
+<pre><code>$ pip install ply==2.5</code></pre>
+
+<p>Install <code>pyflowtools</code></p>
+
+<pre><code>$ brew install https://raw.github.com/hoxworth/homebrew/25921d95ff10d1b505e933a581e0b4fb8d72d952/Library/Formula/flow-tools.rb
+$ pip install git+https://git.gitorious.org/flow-tools/pyflowtools.git</code></pre>
+
+<p>Install Misc Dependencies</p>
+
+<pre><code>$ pip install netaddr</code></pre>
+
+<p>Freeze</p>
+
+<pre><code>$ pip freeze  
+Cython==0.15.1
+distribute==0.6.24
+logilab-astng==0.23.1
+logilab-common==0.57.1
+netaddr==0.7.6
+numexpr==2.0.1
+numpy==1.6.1
+ply==2.5
+pyflowtools==0.3.4.1
+pylint==0.25.1
+tables==2.3.1
+wsgiref==0.1.2</code></pre>
+
+<p>Test Run Flowy</p>
+
+<pre><code>[parser] $ python ft2hdf.py ../../traces/ ft-traces.h5
+[parser] $ python printhdf.py ft-traces.h5
+[parser] $ python print_hdf_in_step.py ft-traces.h5
+[parser] $ python flowy.py query.flw</code></pre>
+
+<p>where <code>query.flw</code> refers to the input <code>ft-traces.h5</code> and the to-be created <code>output.h5</code></p>
 </div>
 
 <div id="related">
@@ -42,7 +87,7 @@
     
       <li><span>21 Feb 2012</span> &raquo; <a href="/2012/02/21/reverse-engineering-the-python-parser">Reverse Engineering the Python Parser</a></li>
     
-      <li><span>21 Feb 2012</span> &raquo; <a href="/2012/02/21/installing-and-running-the-parser">Installing and Running the Parser</a></li>
+      <li><span>20 Feb 2012</span> &raquo; <a href="/2012/02/20/v20-its-a-start">v2.0: it's a start</a></li>
     
   </ul>
 </div>

@@ -4,13 +4,182 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-22T19:00:27+02:00</updated>
+ <updated>2012-09-22T19:26:27+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Reverse Engineering the C Execution Engine</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/02/22/reverse-engineering-the-c-execution-engine"/>
+   <updated>2012-02-22T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/02/22/reverse-engineering-the-c-execution-engine</id>
+   <content type="html">&lt;p&gt;Install Doxygen&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ brew install doxygen&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Initialize Doxygen&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] $ doxygen -g&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Edit the Doxyfile&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[...]
+
+# Extract documentation even from those elements you haven&amp;#39;t yet commented.
+EXTRACT_ALL = YES	
+
+# Extract the relevant parts of the source and associate them with your description.
+INLINE_SOURCE = YES
+
+# Use GraphVIZ for class and collaboration diagrams.
+HAVE_DOT = YES
+
+# Generate a dependency graph for functions and methods.
+CALL_GRAPH = YES
+
+# Skip generating LaTeX sources for PDF.
+GENERATE_LATEX = NO
+
+# Show directory hierarchy in the documentation
+SHOW_DIRECTORIES = YES
+
+# Recursively search for input files.
+RECURSIVE = YES&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Execute Doxygen&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] $ doxygen Doxyfile&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;flowy.c&lt;/code&gt; Dependency Graph&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='Imgur' src='http://i.imgur.com/QXVy4.png' /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;flowy.c&lt;/code&gt; &amp;#8594; &lt;code&gt;main(…)&lt;/code&gt; Call Graph&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='Imgur' src='http://i.imgur.com/uEOVw.png' /&gt;&lt;/p&gt;
+
+&lt;p&gt;A similar Call Graph can also be generated using &lt;code&gt;cflow&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ brew install cflow
+
+$ cflow --format=posix --omit-arguments flowy.c
+    1 main: int (), &amp;lt;flowy.c 204&amp;gt;
+    2     ft_open: &amp;lt;&amp;gt;
+    3     calloc: &amp;lt;&amp;gt;
+    4     perror: &amp;lt;&amp;gt;
+    5     exit: &amp;lt;&amp;gt;
+    6     assign_fptr: &amp;lt;&amp;gt;
+    7     malloc: &amp;lt;&amp;gt;
+    8     pthread_attr_init: &amp;lt;&amp;gt;
+    9     pthread_create: &amp;lt;&amp;gt;
+   10     branch_start: void * (), &amp;lt;flowy.c 149&amp;gt;
+   11         filter: char ** (), &amp;lt;flowy.c 58&amp;gt;
+   12             malloc: &amp;lt;&amp;gt;
+   13             perror: &amp;lt;&amp;gt;
+   14             exit: &amp;lt;&amp;gt;
+   15             func: &amp;lt;&amp;gt;
+   16             realloc: &amp;lt;&amp;gt;
+   17         printf: &amp;lt;&amp;gt;
+   18         grouper: &amp;lt;&amp;gt;
+   19         free: &amp;lt;&amp;gt;
+   20         group_filter: struct group (), &amp;lt;flowy.c 92&amp;gt;
+   21         perror: &amp;lt;&amp;gt;
+   22         exit: &amp;lt;&amp;gt;
+   23         pthread_exit: &amp;lt;&amp;gt;
+   24     pthread_attr_destroy: &amp;lt;&amp;gt;
+   25     pthread_join: &amp;lt;&amp;gt;
+   26     printf: &amp;lt;&amp;gt;
+   27     free: &amp;lt;&amp;gt;
+   28     merger: &amp;lt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;struct flowquery&lt;/code&gt; Collaboration Graph&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='Imgur' src='http://i.imgur.com/tj99w.png' /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://www.vaibhavbajpai.com/documents/thesis/docs/docs-engine/html/index.html'&gt;Complete Documentation &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Reverse Engineering the Python Parser</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/02/21/reverse-engineering-the-python-parser"/>
+   <updated>2012-02-21T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/02/21/reverse-engineering-the-python-parser</id>
+   <content type="html">&lt;p&gt;Install GraphVIZ&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ brew install graphviz
+$ brew linkapps&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install PyLint&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ pip install pylint&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Generate UML Diagrams using PyReverse&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ pyreverse -o png -p parser parser/&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;UML Diagram of the Python Parser&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://www.vaibhavbajpai.com/documents/thesis/docs/docs-parser/packages-parser.png'&gt;Packages &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://www.vaibhavbajpai.com/documents/thesis/docs/docs-parser/classes-parser.png'&gt;Classes &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Installing and Running the Parser</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/02/21/installing-and-running-the-parser"/>
+   <updated>2012-02-21T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/02/21/installing-and-running-the-parser</id>
+   <content type="html">&lt;p&gt;Install PyTables&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ brew install hdf5
+$ brew install lzo
+
+$ pip install numpy
+$ pip install numexpr
+$ pip install cython&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Python Lex &amp;amp; Yacc&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ pip install ply==2.5&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install &lt;code&gt;pyflowtools&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ brew install https://raw.github.com/hoxworth/homebrew/25921d95ff10d1b505e933a581e0b4fb8d72d952/Library/Formula/flow-tools.rb
+$ pip install git+https://git.gitorious.org/flow-tools/pyflowtools.git&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Misc Dependencies&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ pip install netaddr&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Freeze&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ pip freeze  
+Cython==0.15.1
+distribute==0.6.24
+logilab-astng==0.23.1
+logilab-common==0.57.1
+netaddr==0.7.6
+numexpr==2.0.1
+numpy==1.6.1
+ply==2.5
+pyflowtools==0.3.4.1
+pylint==0.25.1
+tables==2.3.1
+wsgiref==0.1.2&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Test Run Flowy&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[parser] $ python ft2hdf.py ../../traces/ ft-traces.h5
+[parser] $ python printhdf.py ft-traces.h5
+[parser] $ python print_hdf_in_step.py ft-traces.h5
+[parser] $ python flowy.py query.flw&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where &lt;code&gt;query.flw&lt;/code&gt; refers to the input &lt;code&gt;ft-traces.h5&lt;/code&gt; and the to-be created &lt;code&gt;output.h5&lt;/code&gt;&lt;/p&gt;</content>
+ </entry>
  
  <entry>
    <title>v2.0: it's a start</title>

@@ -7,6 +7,9 @@ http://vbajpai.github.com/blog.nfql/pages.html
 http://vbajpai.github.com/blog.nfql/sitemap.txt
 http://vbajpai.github.com/blog.nfql/tags.html
 
+http://vbajpai.github.com/blog.nfql/2012/02/22/reverse-engineering-the-c-execution-engine
+http://vbajpai.github.com/blog.nfql/2012/02/21/reverse-engineering-the-python-parser
+http://vbajpai.github.com/blog.nfql/2012/02/21/installing-and-running-the-parser
 http://vbajpai.github.com/blog.nfql/2012/02/20/v20-its-a-start
 http://vbajpai.github.com/blog.nfql/2012/02/20/github-repositories
 http://vbajpai.github.com/blog.nfql/2011/12/25/state-of-the-art
