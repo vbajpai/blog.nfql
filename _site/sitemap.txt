@@ -7,8 +7,11 @@ http://vbajpai.github.com/blog.nfql/pages.html
 http://vbajpai.github.com/blog.nfql/sitemap.txt
 http://vbajpai.github.com/blog.nfql/tags.html
 
+http://vbajpai.github.com/blog.nfql/2012/03/19/group-filter-implementation
+http://vbajpai.github.com/blog.nfql/2012/03/19/flexible-group-aggregations
 http://vbajpai.github.com/blog.nfql/2012/03/12/resolved-grouper-segfaults
 http://vbajpai.github.com/blog.nfql/2012/03/12/new-grouper-features
+http://vbajpai.github.com/blog.nfql/2012/03/12/flow-tools-on-amd64
 http://vbajpai.github.com/blog.nfql/2012/03/01/preliminary-json-parsing-experimentation
 http://vbajpai.github.com/blog.nfql/2012/02/27/debugging-the-execution-engine
 http://vbajpai.github.com/blog.nfql/2012/02/27/command-line-parsing-of-the-execution-engine

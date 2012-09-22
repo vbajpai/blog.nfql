@@ -4,13 +4,122 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-22T20:37:19+02:00</updated>
+ <updated>2012-09-23T11:16:57+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Group Filter Implementation</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/19/group-filter-implementation"/>
+   <updated>2012-03-19T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/19/group-filter-implementation</id>
+   <content type="html">&lt;p&gt;The engine can now filter the groups according to a filtering criteria.&lt;br /&gt;For example, a simple query to filter groups with &lt;code&gt;sum(pkts) &amp;gt; 200&lt;/code&gt; looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;grouper g {
+  module g1 {
+    srcip = srcip
+    dstip = dstip
+  }
+  aggregate srcip, dstip, sum(packets) as pkts
+}
+
+groupfilter gf {
+  pkts &amp;gt; 200
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;such a filtering rule reflects in the engine as (1):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct gfilter_rule gfilter_branch2[1] = {
+  {trace_data-&amp;gt;offsets.dPkts, 200, 0, RULE_GT, NULL}
+};&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where the rule maps to a specific group-filter function using a &lt;code&gt;switch&lt;/code&gt; case (2):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/* for loop for the group-filter */
+  for (int j = 0; j &amp;lt; binfos[i].num_gfilter_rules; j++) {
+    switch (binfos[i].gfilter_rules[j].op) {
+      ...
+      case RULE_GT:
+        binfos[i].gfilter_rules[j].func = gfilter_gt;
+        break;
+      ...
+    }
+  }&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The group-filter functions are auto-generated using a python script &lt;code&gt;fun-gen.py&lt;/code&gt; (3).&lt;/p&gt;
+
+&lt;p&gt;This is how the result looks:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine]$ ./flowy-engine traces-long.ft query.json --debug
+...
+
+No. of Filtered Groups: 5 (Aggregations)
+
+...	   SrcIPaddress   	...     DstIPaddress      Sum(Pkts)
+...	   216.46.94.66    	...  	192.168.0.135     345
+...	   209.84.12.126   	...  	192.168.0.135     475
+...	   207.171.166.252 	...  	192.168.0.135     212&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/auto__assign_8c.html'&gt;&lt;code&gt;auto_assign&lt;/code&gt; references &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/namespacefun__gen.html'&gt;&lt;code&gt;fun_gen&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Flexible Group Aggregations</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/19/flexible-group-aggregations"/>
+   <updated>2012-03-19T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/19/flexible-group-aggregations</id>
+   <content type="html">&lt;p&gt;The group aggregation functions were hardcoded in the &lt;code&gt;group_aggr&lt;/code&gt; struct (1, 2). The functions are now replaced with RULES that map to a specific aggregation function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct grouper_aggr group_aggr_branch1[4] = {
+-    { 0, trace_data-&amp;gt;offsets.srcaddr, aggr_static_uint32_t },
+-    { 0, trace_data-&amp;gt;offsets.dPkts, aggr_sum_uint32_t },
+-    { 0, trace_data-&amp;gt;offsets.dOctets, aggr_sum_uint32_t },
+-    { 0, trace_data-&amp;gt;offsets.tcp_flags, aggr_or_uint16_t }
++    { 0, trace_data-&amp;gt;offsets.srcaddr, RULE_STATIC | RULE_S1_32, NULL },
++    { 0, trace_data-&amp;gt;offsets.dPkts, RULE_SUM | RULE_S1_32, NULL },
++    { 0, trace_data-&amp;gt;offsets.dOctets, RULE_SUM | RULE_S1_32, NULL },
++    { 0, trace_data-&amp;gt;offsets.tcp_flags, RULE_OR | RULE_S1_16, NULL }
+   };&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The mapping of the RULE to the function is done using a &lt;code&gt;switch&lt;/code&gt; case: (3)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/* for loop for the group-aggregation */
+for (int j = 0; j &amp;lt; binfos[i].num_aggr; j++) {
+  switch (binfos[i].aggr[j].op) {
+    ...
+    case RULE_SUM | RULE_S1_32:
+      binfos[i].aggr[j].func = aggr_sum_uint32_t;
+      break;
+      ...
+  }    
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The aggregation functions are auto-generated using a python script &lt;code&gt;fun-gen.py&lt;/code&gt;. (4) In addition, the group aggregation records now also have common fields from the filter stage, so a query like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;filter f {
+  srcport = 80
+}    
+...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;would give group aggregation:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;No. of Groups: 32 (Aggregations)
+
+... Sif   SrcIPaddress    SrcP  DIf   DstIPaddress    ...
+... 0     216.92.252.68   80    0     192.168.0.135   ...
+... 0     74.125.43.155   80    0     192.168.0.135   ... 
+... 0     209.85.129.104  80    0     192.168.0.135   ... &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'&gt;&lt;code&gt;pipeline&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/auto__assign_8c.html'&gt;&lt;code&gt;auto_assign&lt;/code&gt; references &amp;#8594;&lt;/a&gt;&lt;br /&gt;(4) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/namespacefun__gen.html'&gt;&lt;code&gt;fun_gen&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
  
  <entry>
    <title>Resolved Grouper Segfaults</title>
@@ -153,6 +262,53 @@ No. of Sorted Records: 166
 ...    2356654&lt;/code&gt;&lt;/pre&gt;
 &lt;/li&gt;
 &lt;/ul&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>flow tools on AMD64</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/12/flow-tools-on-amd64"/>
+   <updated>2012-03-12T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/12/flow-tools-on-amd64</id>
+   <content type="html">&lt;p&gt;The &lt;code&gt;START&lt;/code&gt; and &lt;code&gt;END&lt;/code&gt; timestamps on pretty-print are emitting garbage values.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ flow-cat traces.ft | flow-print -f 5
+
+Start             End                ...
+0309.03:21:34.835 0309.03:21:34.835  ...
+0107.18:47:30.422 0107.18:47:30.422  ...
+0825.21:13:44.389 0720.19:49:18.819  ...
+0627.22:48:48.456 0627.22:48:48.456  ...
+0502.00:22:40.523 0502.00:22:40.523  ...
+0305.12:08:28.306 0131.20:53:46.834  ...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It turns out the original &lt;code&gt;flow-tools v0.68&lt;/code&gt; (1) does not work well with &lt;code&gt;AMD64&lt;/code&gt; (2). There is an active forked project of original &lt;code&gt;flow-tools&lt;/code&gt; (3) that works on 64-bit systems.&lt;/p&gt;
+
+&lt;p&gt;Installing &lt;a href='https://github.com/downloads/vbajpai/mthesis-src/flow-tools-0.68.4.tar.bz2'&gt;flow-tools 0.68.4 &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ ./configure &amp;amp;&amp;amp; make &amp;amp;&amp;amp; make install
+$ flow-cat traces.ft | flow-print -f 5
+
+Start             End                ...
+1207.23:58:54.835 1207.23:58:54.835  ...
+1207.23:58:58.422 1207.23:58:58.422  ...
+1207.23:58:00.389 1207.23:58:54.819  ...
+1207.23:59:12.456 1207.23:59:12.456  ...
+1207.23:59:12.523 1207.23:59:12.523  ...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and now the engine also spits out timestamps in correct order:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] $ ./flowy-engine --debug traces-long.ft query.json
+
+Start             End                ...
+1207.23:58:54.835 1207.23:58:54.835  ...
+1207.23:58:58.422 1207.23:58:58.422  ...
+1207.23:58:00.389 1207.23:58:54.819  ...
+1207.23:59:12.456 1207.23:59:12.456  ...
+1207.23:59:12.523 1207.23:59:12.523  ...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://www.splintered.net/sw/flow-tools'&gt;original flow-tools &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://ensight.eos.nasa.gov/FlowViewer/faq.html#14'&gt;flow-tools on AMD64 FAQ by FlowViewer &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://code.google.com/p/flow-tools/'&gt;forked flow-tools &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
  </entry>
  
  <entry>

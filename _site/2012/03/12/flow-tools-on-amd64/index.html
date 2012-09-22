@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Installing and Running the Execution Engine</title>
+   <title>flow tools on AMD64</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,39 +26,51 @@
 
     
 <div id="post">
-  <h1>Installing and Running the Execution Engine</h1>
+  <h1>flow tools on AMD64</h1>
   <p class="meta">
-    23 February 2012 
+    12 March 2012 
     
   </p>
-  <p>Install <code>flow-tools</code></p>
+  <p>The <code>START</code> and <code>END</code> timestamps on pretty-print are emitting garbage values.</p>
 
-<p>For 32-bit machines, go ahead, but for <code>AMD64</code> follow (1)</p>
+<pre><code>$ flow-cat traces.ft | flow-print -f 5
 
-<pre><code>$ brew install https://raw.github.com/hoxworth/homebrew/25921d95ff10d1b505e933a581e0b4fb8d72d952/Library/Formula/flow-tools.rb</code></pre>
+Start             End                ...
+0309.03:21:34.835 0309.03:21:34.835  ...
+0107.18:47:30.422 0107.18:47:30.422  ...
+0825.21:13:44.389 0720.19:49:18.819  ...
+0627.22:48:48.456 0627.22:48:48.456  ...
+0502.00:22:40.523 0502.00:22:40.523  ...
+0305.12:08:28.306 0131.20:53:46.834  ...</code></pre>
 
-<p>Building on the command line</p>
+<p>It turns out the original <code>flow-tools v0.68</code> (1) does not work well with <code>AMD64</code> (2). There is an active forked project of original <code>flow-tools</code> (3) that works on 64-bit systems.</p>
 
-<pre><code>[engine] $ make</code></pre>
+<p>Installing <a href='https://github.com/downloads/vbajpai/mthesis-src/flow-tools-0.68.4.tar.bz2'>flow-tools 0.68.4 &#8594;</a></p>
 
-<p>Building using Xcode</p>
+<pre><code>$ ./configure &amp;&amp; make &amp;&amp; make install
+$ flow-cat traces.ft | flow-print -f 5
 
-<p><img alt='Imgur' src='http://i.imgur.com/NrB3s.png' /></p>
+Start             End                ...
+1207.23:58:54.835 1207.23:58:54.835  ...
+1207.23:58:58.422 1207.23:58:58.422  ...
+1207.23:58:00.389 1207.23:58:54.819  ...
+1207.23:59:12.456 1207.23:59:12.456  ...
+1207.23:59:12.523 1207.23:59:12.523  ...</code></pre>
 
-<p>Running on the command line</p>
+<p>and now the engine also spits out timestamps in correct order:</p>
 
-<pre><code>[engine] $ ./flowy-engine --help
-[engine] $ ./flowy-engine $TRACE</code></pre>
+<pre><code>[engine] $ ./flowy-engine --debug traces-long.ft query.json
 
-<p>Running using Xcode</p>
-
-<p>Goto Product &#8594; Edit Scheme to Arguments.</p>
-
-<p><img alt='Imgur' src='http://i.imgur.com/vRdSN.png' /></p>
+Start             End                ...
+1207.23:58:54.835 1207.23:58:54.835  ...
+1207.23:58:58.422 1207.23:58:58.422  ...
+1207.23:58:00.389 1207.23:58:54.819  ...
+1207.23:59:12.456 1207.23:59:12.456  ...
+1207.23:59:12.523 1207.23:59:12.523  ...</code></pre>
 
 <p>Resources:</p>
 
-<p>(1) <a href='http://mthesis.vaibhavbajpai.com/post/19183305904/flow-tools-on-amd64'><code>flow-tools</code> on <code>AMD64</code> &#8594;</a></p>
+<p>(1) <a href='http://www.splintered.net/sw/flow-tools'>original flow-tools &#8594;</a><br />(2) <a href='http://ensight.eos.nasa.gov/FlowViewer/faq.html#14'>flow-tools on AMD64 FAQ by FlowViewer &#8594;</a><br />(3) <a href='http://code.google.com/p/flow-tools/'>forked flow-tools &#8594;</a></p>
 </div>
 
 <div id="related">

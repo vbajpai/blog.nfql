@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Installing and Running the Execution Engine</title>
+   <title>Group Filter Implementation</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,50 +26,72 @@
 
     
 <div id="post">
-  <h1>Installing and Running the Execution Engine</h1>
+  <h1>Group Filter Implementation</h1>
   <p class="meta">
-    23 February 2012 
+    19 March 2012 
     
   </p>
-  <p>Install <code>flow-tools</code></p>
+  <p>The engine can now filter the groups according to a filtering criteria.<br />For example, a simple query to filter groups with <code>sum(pkts) &gt; 200</code> looks like:</p>
 
-<p>For 32-bit machines, go ahead, but for <code>AMD64</code> follow (1)</p>
+<pre><code>grouper g {
+  module g1 {
+    srcip = srcip
+    dstip = dstip
+  }
+  aggregate srcip, dstip, sum(packets) as pkts
+}
 
-<pre><code>$ brew install https://raw.github.com/hoxworth/homebrew/25921d95ff10d1b505e933a581e0b4fb8d72d952/Library/Formula/flow-tools.rb</code></pre>
+groupfilter gf {
+  pkts &gt; 200
+}</code></pre>
 
-<p>Building on the command line</p>
+<p>such a filtering rule reflects in the engine as (1):</p>
 
-<pre><code>[engine] $ make</code></pre>
+<pre><code>struct gfilter_rule gfilter_branch2[1] = {
+  {trace_data-&gt;offsets.dPkts, 200, 0, RULE_GT, NULL}
+};</code></pre>
 
-<p>Building using Xcode</p>
+<p>where the rule maps to a specific group-filter function using a <code>switch</code> case (2):</p>
 
-<p><img alt='Imgur' src='http://i.imgur.com/NrB3s.png' /></p>
+<pre><code>/* for loop for the group-filter */
+  for (int j = 0; j &lt; binfos[i].num_gfilter_rules; j++) {
+    switch (binfos[i].gfilter_rules[j].op) {
+      ...
+      case RULE_GT:
+        binfos[i].gfilter_rules[j].func = gfilter_gt;
+        break;
+      ...
+    }
+  }</code></pre>
 
-<p>Running on the command line</p>
+<p>The group-filter functions are auto-generated using a python script <code>fun-gen.py</code> (3).</p>
 
-<pre><code>[engine] $ ./flowy-engine --help
-[engine] $ ./flowy-engine $TRACE</code></pre>
+<p>This is how the result looks:</p>
 
-<p>Running using Xcode</p>
+<pre><code>[engine]$ ./flowy-engine traces-long.ft query.json --debug
+...
 
-<p>Goto Product &#8594; Edit Scheme to Arguments.</p>
+No. of Filtered Groups: 5 (Aggregations)
 
-<p><img alt='Imgur' src='http://i.imgur.com/vRdSN.png' /></p>
+...	   SrcIPaddress   	...     DstIPaddress      Sum(Pkts)
+...	   216.46.94.66    	...  	192.168.0.135     345
+...	   209.84.12.126   	...  	192.168.0.135     475
+...	   207.171.166.252 	...  	192.168.0.135     212</code></pre>
 
 <p>Resources:</p>
 
-<p>(1) <a href='http://mthesis.vaibhavbajpai.com/post/19183305904/flow-tools-on-amd64'><code>flow-tools</code> on <code>AMD64</code> &#8594;</a></p>
+<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'><code>flowy</code> reference &#8594;</a><br />(2) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/auto__assign_8c.html'><code>auto_assign</code> references &#8594;</a><br />(3) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/namespacefun__gen.html'><code>fun_gen</code> reference &#8594;</a></p>
 </div>
 
 <div id="related">
   <h2>Related Posts</h2>
   <ul class="posts">
     
-      <li><span>19 Mar 2012</span> &raquo; <a href="/2012/03/19/group-filter-implementation">Group Filter Implementation</a></li>
-    
       <li><span>19 Mar 2012</span> &raquo; <a href="/2012/03/19/flexible-group-aggregations">Flexible Group Aggregations</a></li>
     
       <li><span>12 Mar 2012</span> &raquo; <a href="/2012/03/12/resolved-grouper-segfaults">Resolved Grouper Segfaults</a></li>
+    
+      <li><span>12 Mar 2012</span> &raquo; <a href="/2012/03/12/new-grouper-features">New Grouper Features</a></li>
     
   </ul>
 </div>
