@@ -1,0 +1,12 @@
+
+http://vbajpai.github.com/blog.nfql/archive.html
+http://vbajpai.github.com/blog.nfql/atom.xml
+http://vbajpai.github.com/blog.nfql/categories.html
+http://vbajpai.github.com/blog.nfql/index.html
+http://vbajpai.github.com/blog.nfql/pages.html
+http://vbajpai.github.com/blog.nfql/sitemap.txt
+http://vbajpai.github.com/blog.nfql/tags.html
+
+http://vbajpai.github.com/blog.nfql/2012/02/20/v20-its-a-start
+http://vbajpai.github.com/blog.nfql/2012/02/20/github-repositories
+http://vbajpai.github.com/blog.nfql/2011/12/25/state-of-the-art

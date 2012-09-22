@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+ <title>NFQL</title>
+ <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
+ <link href="http://vbajpai.github.com/blog.nfql"/>
+ <updated>2012-09-22T19:00:27+02:00</updated>
+ <id>http://vbajpai.github.com/blog.nfql</id>
+ <author>
+   <name>Vaibhav Bajpai</name>
+   <email>contact@vaibhavbajpai.com</email>
+ </author>
+
+ 
+ <entry>
+   <title>v2.0: it's a start</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/02/20/v20-its-a-start"/>
+   <updated>2012-02-20T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/02/20/v20-its-a-start</id>
+   <content type="html">&lt;p&gt;The evolution of the core of the former Python implementation in C.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; git show v0.0
+
+tag v0.0
+Tagger: Vaibhav Bajpai &amp;lt;contact@vaibhavbajpai.com&amp;gt;
+Date:   Thu May 17 10:48:02 2012 +0200
+Commit 8cb309c8a956c99e6b1494eddb601c8f6a520696
+
+* read flow-records into memory
+* rewrite of the execution pipeline in C (non functional)
+* efficient rule processing with dedicated function pointers
+* reduced grouper complexity using qsort(...) and bsearch(...)
+* concerns
+        - flow query is currently hardcoded in pipeline structs
+        - functions assume specific uintX_t offsets
+        - numerous grouper segfaults
+        - no group filter
+        - commented out merger (segfaults when uncommented)
+        - no ungrouper
+        - code dependent on GNU99 extensions
+        - some headers are missing include guards
+        - unused extraneous source files and headers&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Github Repositories</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/02/20/github-repositories"/>
+   <updated>2012-02-20T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/02/20/github-repositories</id>
+   <content type="html">&lt;p&gt;&lt;a href='https://github.com/vbajpai/nfql'&gt;NFQL Repository &amp;#8594;&lt;/a&gt;&lt;br /&gt;&lt;a href='https://github.com/vbajpai/mastersthesis'&gt;Thesis Repository &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>State of the Art</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2011/12/25/state-of-the-art"/>
+   <updated>2011-12-25T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2011/12/25/state-of-the-art</id>
+   <content type="html">&lt;p&gt;&lt;a href='http://dl.dropbox.com/u/500389/mthesis/f.pdf'&gt;F &amp;#8594;&lt;/a&gt;&lt;br /&gt;Johannes Schauer, Nikolay Melnikov, Jürgen Schönwälder&lt;br /&gt;December 2011.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://dl.dropbox.com/u/500389/mthesis/ipv6transeval.pdf'&gt;Automated Failure Identification under IPv6 Transition Mechanisms &amp;#8594;&lt;/a&gt;&lt;br /&gt;Vaibhav Bajpai, Nikolay Melnikov, Jürgen Schönwälder&lt;br /&gt;December 2011&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://dl.dropbox.com/u/500389/mthesis/jschauer-thesis.pdf'&gt;Flowy 2.0: Fast Execution of Stream-based IP Flow Queries &amp;#8594;&lt;/a&gt;&lt;br /&gt;Johannes Schauer, Bachelors Thesis, May 2011.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=5990668'&gt;Flow signatures of popular applications &amp;#8594;&lt;/a&gt;&lt;br /&gt;&lt;a href='http://cnds.eecs.jacobs-university.de/slides/2011-im-flow-signatures.pdf'&gt;Slides &amp;#8594;&lt;/a&gt;&lt;br /&gt;Vladislav Perelman, Nikolay Melnikov, Jürgen Schönwälder&lt;br /&gt;IM 2011, Dublin, May 2011.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://svn.eecs.jacobs-university.de/svn/eecs/archive/msc-2010/nmelnikov.pdf'&gt;Cybermetrics: Identication of Users Through Network Flow Analysis &amp;#8594;&lt;/a&gt;&lt;br /&gt;Nikolay Melnikov, Masters Thesis, August 2010.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://cnds.eecs.jacobs-university.de/slides/2010-ietf-78-nmrg-app-signatures.pdf'&gt;Flow Signatures of Popular Applications &amp;#8594;&lt;/a&gt;&lt;br /&gt;Nikolay Melnikov&lt;br /&gt;78th IETF, Maastricht, July 2010.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://www.springerlink.com/content/l85hk73487086024/fulltext.pdf'&gt;Cybermetrics: User Identiﬁcation through Network Flow Analysis &amp;#8594;&lt;/a&gt;&lt;br /&gt;&lt;a href='http://cnds.eecs.jacobs-university.de/slides/2010-aims-cybermetrics.pdf'&gt;Slides &amp;#8594;&lt;/a&gt;&lt;br /&gt;Nikolay Melnikov, Jürgen Schönwälder AIMS 2010, Zurich, June 2010.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://www.springerlink.com/content/a565783288655j67/fulltext.pdf'&gt;Implementation of a Stream-Based IP Flow Record Query Language &amp;#8594;&lt;/a&gt;&lt;br /&gt;&lt;a href='http://cnds.eecs.jacobs-university.de/slides/2010-aims-flowy-implementation.pdf'&gt;Slides &amp;#8594;&lt;/a&gt; &lt;br /&gt;Kaloyan Kanev, Nikolay Melnikov, Jürgen Schönwälder&lt;br /&gt;AIMS 2010, Zurich, June 2010.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://svn.eecs.jacobs-university.de/svn/eecs/archive/bsc-2010/vperelman.pdf'&gt;Flow Signatures of Popular Applications &amp;#8594;&lt;/a&gt;&lt;br /&gt;Vladislav Perelman, Bachelors Thesis, May 2010.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://svn.eecs.jacobs-university.de/svn/eecs/archive/bsc-2010/pnemeth.pdf'&gt;Flowy improvement using MapReduce &amp;#8594;&lt;/a&gt;&lt;br /&gt;Peter Nemeth, Bachelors Thesis, May 2010.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://www.springerlink.com/content/j4555jj848l8q862/fulltext.pdf'&gt;Design of a Stream-Based IP Flow Record Query Language &amp;#8594;&lt;/a&gt; &lt;br /&gt;&lt;a href='http://cnds.eecs.jacobs-university.de/slides/2009-dsom-flow-query.pdf'&gt;Slides &amp;#8594;&lt;/a&gt;&lt;br /&gt;Vladislav Marinov, Jürgen Schönwälder&lt;br /&gt;DSOM 2009, Venice, October 2009.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://svn.eecs.jacobs-university.de/svn/eecs/archive/msc-2009/kkanev.pdf'&gt;Flowy - Network Flow Analysis Application &amp;#8594;&lt;/a&gt;&lt;br /&gt;Kaloyan Kanev, Masters Thesis, August 2009.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://svn.eecs.jacobs-university.de/svn/eecs/archive/msc-2009/vmarinov.pdf'&gt;Design of an IP Flow Record Query Language &amp;#8594;&lt;/a&gt;&lt;br /&gt;Vladislav Marinov, Masters Thesis, August 2009.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://www.springerlink.com/content/0m76rk7653872426/fulltext.pdf'&gt;Design of an IP Flow Record Query Language &amp;#8594;&lt;/a&gt;&lt;br /&gt;Vladislav Marinov, Jürgen Schönwälder&lt;br /&gt;AIMS 2008, Bremen, July 2008.&lt;/p&gt;</content>
+ </entry>
+ 
+ 
+</feed>
