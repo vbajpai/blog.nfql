@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Debugging the Execution Engine</title>
+   <title>New Grouper Features</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,62 +26,56 @@
 
     
 <div id="post">
-  <h1>Debugging the Execution Engine</h1>
+  <h1>New Grouper Features</h1>
   <p class="meta">
-    27 February 2012 
+    12 March 2012 
     
   </p>
-  <p>Debugging the execution engine.</p>
-
-<ul>
-<li>Added a <s>`DEBUGENGINE` macro</s> <code>debug bool</code> in <code>base_header.h</code> (1)</li>
-</ul>
-
-<p>Changes in <code>ftreader</code> (2)</p>
-
-<ul>
-<li>Added <code>ftio_check_xfield(…)</code> to check the proper format before retrieving the xfield using <code>ftio_xfield(…)</code></li>
-
-<li>Added <code>flow_print_record(…)</code> to print the flow-records.</li>
-
-<li><code>ftreader</code> now prints the read trace in a <code>flow-print-f5</code> format when <code>DEBUGENGINE</code> is set.</li>
-</ul>
-
-<p>Changes in <code>pipeline</code> (3)</p>
-
-<ul>
+  <ul>
 <li>
-<p>Saving pointers to the filtered records when <code>DEBUGENGINE</code> is set.</p>
+<p>Pretty printing group aggregations as new flow record representatives. For example:</p>
 
-<pre><code>struct branch_info {
-  
-  /* have to be filled manually */
-  ...
-  
-#ifdef DEBUGENGINE
-  char** filtered_records;
-  size_t num_filtered_records;  
-#endif
-  
-  /* will be filled by individual branches */
-  ...
-};</code></pre>
+<pre><code>grouper g_www_res {
+   module g1 {
+      srcip = srcip
+      dstip = dstip
+   }
+   aggregate srcip, dstip, sum(bytes) as bytes, bitOR(tcp_flags) as flags, 
+}</code></pre>
+
+<p>will form groups with same <code>srcIP</code> and <code>dstIP</code> and display as:</p>
+
+<pre><code>No. of Groups: 32 (Aggregations)
+
+...	   SrcIPaddress    ...	  	DstIPaddress      OR(Fl)    Sum(Octets)
+
+...	   4.23.48.126     ...  	192.168.0.135     3         81034
+...	   8.12.214.126    ...  	192.168.0.135     2         5065
+...	   80.157.170.88   ...  	192.168.0.135     6         18025</code></pre>
+
+<p>The idea is to return aggregates, common fields and sets of uncommon fields.<br />The feature to return set of uncommon fields still needs to be implemented.</p>
+</li>
+
+<li>
+<p>There can be a situtation as in the example above, where the query designer might incorrectly ask for aggregation on a field already specified in a grouper module. Of course, the aggregation does not make any sense, since the grouped record will always have the same value for that field. The engine is now smart to realize it and ignores such aggregations as above.</p>
+</li>
+
+<li>
+<p>Records are clubbed together into one group if no group modules are defined</p>
+
+<pre><code>grouper g_www_res {
+   module g1 {}
+   aggregate sum(bytes) as bytes
+}</code></pre>
+
+<p>Previously such a query would form groups for each individual filtered record. That was less useful since then one could not just perform meaningful aggregates (as above). Now, when the group modules are empty, all the filtered records are clubbed into one group to allow such aggregations.</p>
+
+<pre><code>No. of Groups: 1 (Aggregations)
+
+...    Sum(Octets)
+...    2356654</code></pre>
 </li>
 </ul>
-
-<p>Changes in <code>flowy</code> (4)</p>
-
-<ul>
-<li>Added a bunch load of code comments to describe the flow.</li>
-
-<li>Added separate macros for each stage of the pipeline for now, until the segfault is resolved.</li>
-
-<li>Printing the filtered flow-records when the <s>`DEBUGENGINE`</s> <code>--debug</code> is set.</li>
-</ul>
-
-<p>Resources -</p>
-
-<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/base__header_8h.html'><code>base_header</code> reference &#8594;</a><br />(2) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/ftreader_8c.html'><code>ftreader</code> reference &#8594;</a> <br />(3) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'><code>pipeline</code> reference &#8594;</a><br />(4) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'><code>flowy</code> reference &#8594;</a></p>
 </div>
 
 <div id="related">
@@ -90,9 +84,9 @@
     
       <li><span>12 Mar 2012</span> &raquo; <a href="/2012/03/12/resolved-grouper-segfaults">Resolved Grouper Segfaults</a></li>
     
-      <li><span>12 Mar 2012</span> &raquo; <a href="/2012/03/12/new-grouper-features">New Grouper Features</a></li>
-    
       <li><span>01 Mar 2012</span> &raquo; <a href="/2012/03/01/preliminary-json-parsing-experimentation">Preliminary JSON Parsing Experimentation</a></li>
+    
+      <li><span>27 Feb 2012</span> &raquo; <a href="/2012/02/27/debugging-the-execution-engine">Debugging the Execution Engine</a></li>
     
   </ul>
 </div>

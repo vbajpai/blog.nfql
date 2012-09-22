@@ -4,13 +4,224 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-22T20:11:23+02:00</updated>
+ <updated>2012-09-22T20:37:19+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Resolved Grouper Segfaults</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/12/resolved-grouper-segfaults"/>
+   <updated>2012-03-12T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/12/resolved-grouper-segfaults</id>
+   <content type="html">&lt;p&gt;Removed GNU99 extensions to increase portability&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Replaced &lt;code&gt;Boolean enum&lt;/code&gt; with &lt;code&gt;C99 bool&lt;/code&gt;&lt;/li&gt;
+
+&lt;li&gt;Removed Anonymous Unions&lt;/li&gt;
+
+&lt;li&gt;Added a &lt;code&gt;C99&lt;/code&gt; flag in the Makefile.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The order of arguments passed in &lt;code&gt;qsort_r(…)&lt;/code&gt; and &lt;code&gt;bsearch_r(…)&lt;/code&gt; was incorrect. This could also be due to the different order of arguments in &lt;code&gt;glibc&lt;/code&gt; and &lt;code&gt;BSD&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void 
+qsort_r(
+        void *base, size_t nel, 
+        size_t width, 
+        void *thunk, 
+        int (*compar)(void *, const void *, const void *)
+       );
+		
+void *
+bsearch_r(
+          const void *key, 
+          const void *base, 
+          size_t nel, 
+          size_t width, 
+          void *thunk, 
+          int (*compar) (const void *, const void *)
+         );&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Removed the &lt;code&gt;--absolute&lt;/code&gt; switch. This should be implied from the supplied query.&lt;/p&gt;
+
+&lt;p&gt;Pretty Printing each sub stage of the grouper pipeline.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;printing the sorted filtered records on &lt;code&gt;--debug&lt;/code&gt;. The records are sorted to the first rule in the grouper module:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;grouper g_www_req {
+   module g1 {
+      srcip = srcip
+	  ...
+   }	  
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;then the filtered records are sorted according to the &lt;code&gt;srcip&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine]$ ./flowy-engine --debug traces-long.ft query.json
+
+No. of Sorted Records: 166
+
+...	SrcIPaddress    ...
+
+...	4.23.48.126     ...
+...	4.23.48.126     ...
+...	4.23.48.126     ...
+...	8.12.214.126    ...&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;printing the unique sorted records on &lt;code&gt;--debug&lt;/code&gt;. The duplicate sorted records are filtered out:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;No. of Unique Records: 32
+
+...	SrcIPaddress    ...
+
+...	4.23.48.126     ...
+...	8.12.214.126    ... &lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;printing the formed groups on &lt;code&gt;--debug&lt;/code&gt;. The example shows groups formed with records having the same &lt;code&gt;srcIP&lt;/code&gt; and &lt;code&gt;dstIP&lt;/code&gt; and having &lt;code&gt;srcP 80&lt;/code&gt; (which was the rule in the filter stage)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;No. of Groups: 32 (Verbose Output)
+
+...	SrcIPaddress    SrcP  DIf   DstIPaddress   ...
+
+...	4.23.48.126     80    0     192.168.0.135  ...
+...	4.23.48.126     80    0     192.168.0.135  ...
+
+...	8.12.214.126    80    0     192.168.0.135  ...
+...	8.12.214.126    80    0     192.168.0.135  ...&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>New Grouper Features</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/12/new-grouper-features"/>
+   <updated>2012-03-12T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/12/new-grouper-features</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Pretty printing group aggregations as new flow record representatives. For example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;grouper g_www_res {
+   module g1 {
+      srcip = srcip
+      dstip = dstip
+   }
+   aggregate srcip, dstip, sum(bytes) as bytes, bitOR(tcp_flags) as flags, 
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;will form groups with same &lt;code&gt;srcIP&lt;/code&gt; and &lt;code&gt;dstIP&lt;/code&gt; and display as:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;No. of Groups: 32 (Aggregations)
+
+...	   SrcIPaddress    ...	  	DstIPaddress      OR(Fl)    Sum(Octets)
+
+...	   4.23.48.126     ...  	192.168.0.135     3         81034
+...	   8.12.214.126    ...  	192.168.0.135     2         5065
+...	   80.157.170.88   ...  	192.168.0.135     6         18025&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The idea is to return aggregates, common fields and sets of uncommon fields.&lt;br /&gt;The feature to return set of uncommon fields still needs to be implemented.&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;There can be a situtation as in the example above, where the query designer might incorrectly ask for aggregation on a field already specified in a grouper module. Of course, the aggregation does not make any sense, since the grouped record will always have the same value for that field. The engine is now smart to realize it and ignores such aggregations as above.&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Records are clubbed together into one group if no group modules are defined&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;grouper g_www_res {
+   module g1 {}
+   aggregate sum(bytes) as bytes
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Previously such a query would form groups for each individual filtered record. That was less useful since then one could not just perform meaningful aggregates (as above). Now, when the group modules are empty, all the filtered records are clubbed into one group to allow such aggregations.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;No. of Groups: 1 (Aggregations)
+
+...    Sum(Octets)
+...    2356654&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Preliminary JSON Parsing Experimentation</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/01/preliminary-json-parsing-experimentation"/>
+   <updated>2012-03-01T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/01/preliminary-json-parsing-experimentation</id>
+   <content type="html">&lt;p&gt;Preliminary JSON parsing experimentation&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;added filter comparison functions in &lt;code&gt;auto_assign.c&lt;/code&gt; using &lt;code&gt;fun_gen.py&lt;/code&gt; (1, 2)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;using the new comparison functions in the &lt;code&gt;filter_rule&lt;/code&gt; struct (3)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;added a temporary &lt;code&gt;filter-poop.py&lt;/code&gt; to spit out JSON representation of a python object using the &lt;code&gt;json&lt;/code&gt; module (4, 5)&lt;/p&gt;
+
+&lt;p&gt;where the python class is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class FilterStatement: 		  
+  def __init__(self, name, value, datatype, delta, op):
+    self.offset = {
+      &amp;#39;name&amp;#39;: name,
+      &amp;#39;value&amp;#39;: value,
+      &amp;#39;datatype&amp;#39;: datatype
+    }		    
+    self.delta = delta
+    self.op = op		&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;executing the python file gives:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ python filter-poop.py
+{
+  &amp;quot;delta&amp;quot;: 0, 
+  &amp;quot;op&amp;quot;: &amp;quot;RULE_EQ&amp;quot;, 
+  &amp;quot;offset&amp;quot;: {
+    &amp;quot;datatype&amp;quot;: &amp;quot;u_int16&amp;quot;, 
+    &amp;quot;name&amp;quot;: &amp;quot;dstport&amp;quot;, 
+    &amp;quot;value&amp;quot;: 80
+  }
+} 		    &lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;The execution engine can now parse this JSON file to read the parameters for the filter stage (for now) (3, 6)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ ./flowy-engine --absolute traces.ft query.json
+
+No. of Filtered Records: 4
+
+...	SrcIPaddress    SrcP  DIf   DstIPaddress    DstP  ...
+...	10.50.239.4     39788 0     209.85.135.19   80    ...
+...	10.50.239.4     40339 0     81.19.80.14     80    ...
+...	10.50.239.4     46499 0     209.85.135.19   80    ...&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Resources -&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/auto__assign_8c.html'&gt;&lt;code&gt;auto_assign&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/fun__gen_8py.html'&gt;&lt;code&gt;fun_gen&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(4) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/namespacefilter-poop.html'&gt;&lt;code&gt;filter-poop&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;External Resources -&lt;/p&gt;
+
+&lt;p&gt;(5) &lt;a href='http://docs.python.org/library/json.html'&gt;&lt;code&gt;python json module&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(6) &lt;a href='http://oss.metaparadigm.com/json-c/'&gt;&lt;code&gt;json-c library&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
  
  <entry>
    <title>Debugging the Execution Engine</title>
@@ -67,13 +278,7 @@
 
 &lt;p&gt;Resources -&lt;/p&gt;
 
-&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/base__header_8h.html'&gt;&lt;code&gt;base_header&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/ftreader_8c.html'&gt;&lt;code&gt;ftreader&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'&gt;&lt;code&gt;pipeline&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;(4) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/base__header_8h.html'&gt;&lt;code&gt;base_header&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/ftreader_8c.html'&gt;&lt;code&gt;ftreader&lt;/code&gt; reference &amp;#8594;&lt;/a&gt; &lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'&gt;&lt;code&gt;pipeline&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(4) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
  </entry>
  
  <entry>

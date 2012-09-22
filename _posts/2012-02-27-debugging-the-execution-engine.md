@@ -46,10 +46,7 @@ Changes in `flowy` (4)
 
 Resources -
 
-(1) [`base_header` reference &rarr;](http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/base__header_8h.html)
-
-(2) [`ftreader` reference &rarr;](http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/ftreader_8c.html)
-
-(3) [`pipeline` reference &rarr;](http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html)
-
-(4) [`flowy` reference &rarr;](http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html)
+(1) [`base_header` reference &rarr;](http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/base__header_8h.html)  
+(2) [`ftreader` reference &rarr;](http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/ftreader_8c.html)   
+(3) [`pipeline` reference &rarr;](http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html)  
+(4) [`flowy` reference &rarr;](http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html)  
