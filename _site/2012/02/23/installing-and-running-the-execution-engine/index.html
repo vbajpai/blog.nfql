@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Github Repositories</title>
+   <title>Installing and Running the Execution Engine</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,12 +26,39 @@
 
     
 <div id="post">
-  <h1>Github Repositories</h1>
+  <h1>Installing and Running the Execution Engine</h1>
   <p class="meta">
-    20 February 2012 
+    23 February 2012 
     
   </p>
-  <p><a href='https://github.com/vbajpai/nfql'>NFQL Repository &#8594;</a><br /><a href='https://github.com/vbajpai/mastersthesis'>Thesis Repository &#8594;</a></p>
+  <p>Install <code>flow-tools</code></p>
+
+<p>For 32-bit machines, go ahead, but for <code>AMD64</code> follow (1)</p>
+
+<pre><code>$ brew install https://raw.github.com/hoxworth/homebrew/25921d95ff10d1b505e933a581e0b4fb8d72d952/Library/Formula/flow-tools.rb</code></pre>
+
+<p>Building on the command line</p>
+
+<pre><code>[engine] $ make</code></pre>
+
+<p>Building using Xcode</p>
+
+<p><img alt='Imgur' src='http://i.imgur.com/NrB3s.png' /></p>
+
+<p>Running on the command line</p>
+
+<pre><code>[engine] $ ./flowy-engine --help
+[engine] $ ./flowy-engine $TRACE</code></pre>
+
+<p>Running using Xcode</p>
+
+<p>Goto Product &#8594; Edit Scheme to Arguments.</p>
+
+<p><img alt='Imgur' src='http://i.imgur.com/vRdSN.png' /></p>
+
+<p>Resources:</p>
+
+<p>(1) <a href='http://mthesis.vaibhavbajpai.com/post/19183305904/flow-tools-on-amd64'><code>flow-tools</code> on <code>AMD64</code> &#8594;</a></p>
 </div>
 
 <div id="related">
@@ -42,7 +69,7 @@
     
       <li><span>23 Feb 2012</span> &raquo; <a href="/2012/02/23/removing-extraneous-files-from-the-execution-engine">Removing Extraneous Files from the Execution Engine</a></li>
     
-      <li><span>23 Feb 2012</span> &raquo; <a href="/2012/02/23/installing-and-running-the-execution-engine">Installing and Running the Execution Engine</a></li>
+      <li><span>22 Feb 2012</span> &raquo; <a href="/2012/02/22/reverse-engineering-the-c-execution-engine">Reverse Engineering the C Execution Engine</a></li>
     
   </ul>
 </div>

@@ -7,6 +7,9 @@ http://vbajpai.github.com/blog.nfql/pages.html
 http://vbajpai.github.com/blog.nfql/sitemap.txt
 http://vbajpai.github.com/blog.nfql/tags.html
 
+http://vbajpai.github.com/blog.nfql/2012/02/23/the-execution-engine-currently-segfaults
+http://vbajpai.github.com/blog.nfql/2012/02/23/removing-extraneous-files-from-the-execution-engine
+http://vbajpai.github.com/blog.nfql/2012/02/23/installing-and-running-the-execution-engine
 http://vbajpai.github.com/blog.nfql/2012/02/22/reverse-engineering-the-c-execution-engine
 http://vbajpai.github.com/blog.nfql/2012/02/21/reverse-engineering-the-python-parser
 http://vbajpai.github.com/blog.nfql/2012/02/21/installing-and-running-the-parser
