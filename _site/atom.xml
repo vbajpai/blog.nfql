@@ -4,7 +4,7 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-22T19:58:29+02:00</updated>
+ <updated>2012-09-22T20:11:23+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
@@ -497,6 +497,16 @@ Commit 8cb309c8a956c99e6b1494eddb601c8f6a520696
    <updated>2012-02-20T00:00:00+01:00</updated>
    <id>http://vbajpai.github.com/blog.nfql/2012/02/20/github-repositories</id>
    <content type="html">&lt;p&gt;&lt;a href='https://github.com/vbajpai/nfql'&gt;NFQL Repository &amp;#8594;&lt;/a&gt;&lt;br /&gt;&lt;a href='https://github.com/vbajpai/mastersthesis'&gt;Thesis Repository &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Masters Thesis Proposal</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/02/01/masters-thesis-proposal"/>
+   <updated>2012-02-01T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/02/01/masters-thesis-proposal</id>
+   <content type="html">&lt;p&gt;I submitted my thesis proposal today.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/downloads/vbajpai/blog.nfql/vbajpai-proposal.pdf'&gt;Masters Thesis Proposal &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
  </entry>
  
  <entry>

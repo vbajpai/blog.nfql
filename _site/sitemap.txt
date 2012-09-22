@@ -18,4 +18,5 @@ http://vbajpai.github.com/blog.nfql/2012/02/21/reverse-engineering-the-python-pa
 http://vbajpai.github.com/blog.nfql/2012/02/21/installing-and-running-the-parser
 http://vbajpai.github.com/blog.nfql/2012/02/20/v20-its-a-start
 http://vbajpai.github.com/blog.nfql/2012/02/20/github-repositories
+http://vbajpai.github.com/blog.nfql/2012/02/01/masters-thesis-proposal
 http://vbajpai.github.com/blog.nfql/2011/12/25/state-of-the-art
