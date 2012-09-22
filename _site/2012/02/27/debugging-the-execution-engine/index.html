@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Installing and Running the Parser</title>
+   <title>Debugging the Execution Engine</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,68 +26,79 @@
 
     
 <div id="post">
-  <h1>Installing and Running the Parser</h1>
+  <h1>Debugging the Execution Engine</h1>
   <p class="meta">
-    21 February 2012 
+    27 February 2012 
     
   </p>
-  <p>Install PyTables</p>
+  <p>Debugging the execution engine.</p>
 
-<pre><code>$ brew install hdf5
-$ brew install lzo
+<ul>
+<li>Added a <s>`DEBUGENGINE` macro</s> <code>debug bool</code> in <code>base_header.h</code> (1)</li>
+</ul>
 
-$ pip install numpy
-$ pip install numexpr
-$ pip install cython</code></pre>
+<p>Changes in <code>ftreader</code> (2)</p>
 
-<p>Install Python Lex &amp; Yacc</p>
+<ul>
+<li>Added <code>ftio_check_xfield(…)</code> to check the proper format before retrieving the xfield using <code>ftio_xfield(…)</code></li>
 
-<pre><code>$ pip install ply==2.5</code></pre>
+<li>Added <code>flow_print_record(…)</code> to print the flow-records.</li>
 
-<p>Install <code>pyflowtools</code></p>
+<li><code>ftreader</code> now prints the read trace in a <code>flow-print-f5</code> format when <code>DEBUGENGINE</code> is set.</li>
+</ul>
 
-<pre><code>$ brew install https://raw.github.com/hoxworth/homebrew/25921d95ff10d1b505e933a581e0b4fb8d72d952/Library/Formula/flow-tools.rb
-$ pip install git+https://git.gitorious.org/flow-tools/pyflowtools.git</code></pre>
+<p>Changes in <code>pipeline</code> (3)</p>
 
-<p>Install Misc Dependencies</p>
+<ul>
+<li>
+<p>Saving pointers to the filtered records when <code>DEBUGENGINE</code> is set.</p>
 
-<pre><code>$ pip install netaddr</code></pre>
+<pre><code>struct branch_info {
+  
+  /* have to be filled manually */
+  ...
+  
+#ifdef DEBUGENGINE
+  char** filtered_records;
+  size_t num_filtered_records;  
+#endif
+  
+  /* will be filled by individual branches */
+  ...
+};</code></pre>
+</li>
+</ul>
 
-<p>Freeze</p>
+<p>Changes in <code>flowy</code> (4)</p>
 
-<pre><code>$ pip freeze  
-Cython==0.15.1
-distribute==0.6.24
-logilab-astng==0.23.1
-logilab-common==0.57.1
-netaddr==0.7.6
-numexpr==2.0.1
-numpy==1.6.1
-ply==2.5
-pyflowtools==0.3.4.1
-pylint==0.25.1
-tables==2.3.1
-wsgiref==0.1.2</code></pre>
+<ul>
+<li>Added a bunch load of code comments to describe the flow.</li>
 
-<p>Test Run Flowy</p>
+<li>Added separate macros for each stage of the pipeline for now, until the segfault is resolved.</li>
 
-<pre><code>[parser] $ python ft2hdf.py ../../traces/ ft-traces.h5
-[parser] $ python printhdf.py ft-traces.h5
-[parser] $ python print_hdf_in_step.py ft-traces.h5
-[parser] $ python flowy.py query.flw</code></pre>
+<li>Printing the filtered flow-records when the <s>`DEBUGENGINE`</s> <code>--debug</code> is set.</li>
+</ul>
 
-<p>where <code>query.flw</code> refers to the input <code>ft-traces.h5</code> and the to-be created <code>output.h5</code></p>
+<p>Resources -</p>
+
+<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/base__header_8h.html'><code>base_header</code> reference &#8594;</a></p>
+
+<p>(2) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/ftreader_8c.html'><code>ftreader</code> reference &#8594;</a></p>
+
+<p>(3) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'><code>pipeline</code> reference &#8594;</a></p>
+
+<p>(4) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'><code>flowy</code> reference &#8594;</a></p>
 </div>
 
 <div id="related">
   <h2>Related Posts</h2>
   <ul class="posts">
     
-      <li><span>27 Feb 2012</span> &raquo; <a href="/2012/02/27/debugging-the-execution-engine">Debugging the Execution Engine</a></li>
-    
       <li><span>27 Feb 2012</span> &raquo; <a href="/2012/02/27/command-line-parsing-of-the-execution-engine">Command Line Parsing of the Execution Engine</a></li>
     
       <li><span>24 Feb 2012</span> &raquo; <a href="/2012/02/24/refactoring-the-execution-engine">Refactoring the Execution Engine</a></li>
+    
+      <li><span>23 Feb 2012</span> &raquo; <a href="/2012/02/23/the-execution-engine-currently-segfaults">The Execution Engine currently segfaults</a></li>
     
   </ul>
 </div>
