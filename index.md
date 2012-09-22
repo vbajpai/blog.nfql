@@ -1,13 +1,25 @@
 ---
 layout: page
-title: The Geek Debauchery!
+title: NFQL
 tagline: Supporting tagline
 ---
 {% include JB/setup %}
 
-Vaibhav Bajpai is a Graduate Student in the [Computer Science-Smart Systems Program](http://ses.jacobs-university.de/ses/smartsystems) at [Jacobs University Bremen](http://jacobs-university.de/). He is interested in Computer Networks, Operating Systems and Computer Vision.
+Cisco’s NetFlow protocol and IETF’s IPFIX open standard have contributed
+heavily in pushing IP flow export as the de-facto technique for
+collecting aggregate network traffic statistics. These flow records are
+used for billing and mediation, bandwidth provisioning, detecting
+malicious attacks and network performance evaluation. However,
+understanding certain traffic patterns requires sophisticated flow
+analysis tools that can mine flow records for such a usage. We recently
+proposed a flow query language that can cap such flow-records. In this
+work, we introduce NFQL, an efficient implementation of the query
+language. NFQL can process flow records, aggregate them into groups,
+apply absolute or relative filters, invoke Allen interval algebra rules,
+and merge group records. NFQL has been evaluated by a suite of
+benchmarks against contemporary flow-processing tools.
 
-[www.vaibhavbajpai.com &rarr;](http://www.vaibhavbajpai.com)  
+[nfql.vaibhavbajpai.com &rarr;](http://nfql.vaibhavbajpai.com)  
   
 <br/>
   
