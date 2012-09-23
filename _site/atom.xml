@@ -4,13 +4,375 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T12:02:24+02:00</updated>
+ <updated>2012-09-23T16:38:14+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Few Closed Issues</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/11/few-closed-issues"/>
+   <updated>2012-04-11T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/11/few-closed-issues</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Greedily deallocating non-filtered records.&lt;/p&gt;
+
+&lt;p&gt;Each branch of the pipeline is executed by a separate thread. Since each branch does NOT have a copy of the trace but points to the original records, individual branches CANNOT free the records that were not filtered by them, since they could be filtered by some other branch. As a consequence, the records that were not filtered by any branch can only be free&amp;#8217;d once all threads join the &lt;code&gt;main(…)&lt;/code&gt;, ie. before calling the &lt;code&gt;merger(…)&lt;/code&gt;. The following implementation is costly and runs in worst case &lt;code&gt;O(nkm)&lt;/code&gt; where &lt;code&gt;n&lt;/code&gt; is the number of records in the trace, &lt;code&gt;k&lt;/code&gt; is the number of branches, and &lt;code&gt;m&lt;/code&gt; is the number of filtered records in each branch.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;-  for (int i = 0; i &amp;lt; param_data-&amp;gt;trace-&amp;gt;num_records; i++) {
+-    bool if_filtered_record = false;
+-    char* record = param_data-&amp;gt;trace-&amp;gt;records[i];
+-    for (int j = 0; j &amp;lt; fquery-&amp;gt;num_branches; j++) {
+-      struct branch_info* branch = fquery-&amp;gt;branchset[j];        
+-      for (int k = 0; k &amp;lt; branch-&amp;gt;filter_result-&amp;gt;num_filtered_records; k++) {
+-        char* filtered_record = branch-&amp;gt;filter_result-&amp;gt;filtered_recordset[k];
+-	  ...
+-    }
+-    if (!if_filtered_record) {
+-      free(record); record = NULL;
+-      param_data-&amp;gt;trace-&amp;gt;records[i] = NULL;      
+-    }
+
+    struct merger_result* mresult = merger(...)
+    ...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Instead, it would be better to extend the trace structure to allow a flag that stores meta-information about the record.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    struct ft_data {
+-     char**                          records;
++     struct record**                 recordset;
++     int                             num_records;
+    };
+ 
++   struct record {
++     char*                           record;
++     bool                            if_filtered;
++   };	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, the same can free the non-filtered records in worst case &lt;code&gt;O(n)&lt;/code&gt; time where &lt;code&gt;n&lt;/code&gt; is the number of records in the trace.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;+  for (int i = 0; i &amp;lt; param_data-&amp;gt;trace-&amp;gt;num_records; i++) {      
++    struct record* recordinfo = param_data-&amp;gt;trace-&amp;gt;recordset[i];
++    if (recordinfo-&amp;gt;if_filtered == false)
++      free(recordinfo-&amp;gt;record); recordinfo-&amp;gt;record = NULL;
+   }&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Resolved a Grouper segfault when NO records got filtered.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;   struct filter_result* fresult = filter(...);
++  if (fresult-&amp;gt;num_filtered_records == 0)
++    pthread_exit(NULL);
+      
+   struct grouper_result* gresult = grouper(...);  &lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Complete Execution Engine Refactor</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/11/complete-execution-engine-refactor"/>
+   <updated>2012-04-11T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/11/complete-execution-engine-refactor</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The complete project flow is reorganized to increase readability (1, 2)&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='parse_cmdline_args(…)' src='http://i.imgur.com/bwNbS.png' /&gt;&lt;br /&gt;&lt;img alt='parse_json_query(…))' src='http://i.imgur.com/fGEHp.png' /&gt;&lt;br /&gt;&lt;img alt='prepare_flowquery(…)' src='http://i.imgur.com/o0aNo.png' /&gt;&lt;br /&gt;&lt;img alt='read_param_data(…)' src='http://i.imgur.com/bNZyn.png' /&gt;&lt;br /&gt;&lt;img alt='filter(…)' src='http://i.imgur.com/boMWR.png' /&gt;&lt;br /&gt;&lt;img alt='get_grouper_intermediate(…)' src='http://i.imgur.com/0ajML.png' /&gt;&lt;br /&gt;&lt;img alt='grouper_aggregations(…)' src='http://i.imgur.com/l9wcn.png' /&gt;&lt;br /&gt;&lt;img alt='grouperfilter(…)' src='http://i.imgur.com/nI5EY.png' /&gt;&lt;br /&gt;&lt;img alt='merger(…)' src='http://i.imgur.com/jR86d.png' /&gt; &lt;br /&gt;&lt;img alt='ungrouper(…)' src='http://i.imgur.com/5CTgc.png' /&gt;&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Query rules are clubbed in &lt;code&gt;X_ruleset&lt;/code&gt;, &lt;code&gt;X&lt;/code&gt; is &lt;code&gt;filter&lt;/code&gt;, &lt;code&gt;grouper&lt;/code&gt;, &lt;code&gt;gfilter&lt;/code&gt;, &lt;code&gt;merger&lt;/code&gt; (3)&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;flowquery {...}&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct flowquery {  
+  size_t                          num_branches;  
+  struct branch**                 branchset;  
+  			  
+  size_t                          num_merger_rules;  
+  struct merger_rule**            mruleset;
+  
+  struct merger_result*           merger_result; 
+  struct ungrouper_result*        ungrouper_result;
+};	&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;branch {...}&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct branch {
+
+  /*---------------------------------------------------------------*/  
+  /*                          inputs                               */
+  /*---------------------------------------------------------------*/  
+  ...		
+  size_t                          num_filter_rules;
+  size_t                          num_grouper_rules;
+  size_t                          num_aggr_rules;
+  size_t                          num_gfilter_rules;
+  
+  struct filter_rule**            filter_ruleset;  
+  struct grouper_rule**           grouper_ruleset;
+  struct aggr_rule**              aggr_ruleset;  
+  struct gfilter_rule**           gfilter_ruleset;  
+  /*---------------------------------------------------------------*/  
+
+  /*---------------------------------------------------------------*/  
+  /*                          output                               */
+  /*---------------------------------------------------------------*/  
+  struct filter_result*           filter_result;
+  struct grouper_result*          grouper_result;
+  struct groupfilter_result*      gfilter_result;
+  /*---------------------------------------------------------------*/  
+
+};&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Each stage returns &lt;code&gt;X_result&lt;/code&gt; &lt;code&gt;X&lt;/code&gt; is &lt;code&gt;filter&lt;/code&gt;, &lt;code&gt;grouper&lt;/code&gt;, &lt;code&gt;gfilter&lt;/code&gt;, &lt;code&gt;merger&lt;/code&gt;, &lt;code&gt;ungrouper&lt;/code&gt; (3).&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;filter(...)&lt;/code&gt; returns &lt;code&gt;filter_result&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct filter_result* filter(...) {...}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct filter_result {          
+  size_t                          num_filtered_records;
+  char**                          filtered_recordset;  
+};&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;grouper(...)&lt;/code&gt; returns &lt;code&gt;grouper_result&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct grouper_result* grouper(...) {...}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct grouper_result {
+  size_t                          num_unique_records;  
+  char**                          sorted_recordset;
+  char**                          unique_recordset;
+  
+  size_t                          num_groups;  
+  struct group**                  groupset;
+};		&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;groupfilter(...)&lt;/code&gt; returns &lt;code&gt;groupfilter_result&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct groupfilter_result* groupfilter(...) {...}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct groupfilter_result {
+  size_t                          num_filtered_groups;  
+  struct group**                  filtered_groupset;
+};&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;merger(...)&lt;/code&gt; returns &lt;code&gt;merger_result&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct merger_result* merger(...) {...}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct merger_result {
+  size_t                          num_group_tuples;  
+  size_t                          total_num_group_tuples;
+  struct group***                 group_tuples;
+};&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;ungrouper(...)&lt;/code&gt; returns &lt;code&gt;ungrouper_result&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct ungrouper_result* ungrouper(...) {...}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct ungrouper_result {
+  size_t                          num_streams;    
+  struct stream**                 streamset;
+};&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Added &lt;code&gt;echo.{h,c}&lt;/code&gt; for verbose and debug modes (4)&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;with atleast &lt;code&gt;--verbose=1&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='echo_filter' src='http://i.imgur.com/1AGfj.png' /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;with atleast &lt;code&gt;--verbose=2&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='echo_grouper' src='http://i.imgur.com/sGZff.png' /&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img alt='echo_group_aggr' src='http://i.imgur.com/IjdHh.png' /&gt;&lt;br /&gt;&lt;img alt='echo_gfilter' src='http://i.imgur.com/4JqOp.png' /&gt;&lt;br /&gt;&lt;img alt='echo_merger' src='http://i.imgur.com/aKQs0.png' /&gt;&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;always:&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='echo_results' src='http://i.imgur.com/guxpg.png' /&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;X_ruleset&lt;/code&gt; are deallocated as soon as &lt;code&gt;X&lt;/code&gt; stage returns.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;grouper(...)&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; branch-&amp;gt;grouper_result = grouper(...); 
+ if (branch-&amp;gt;grouper_result == NULL)
+   errExit(&amp;quot;grouper(...) returned NULL&amp;quot;);
+ else {
+ 			    
+   /* free filter rules */
+   ...		
+   /* free grouper rules */
+   ...				    
+   /* free grouper aggregation rules */
+   ...		
+ }  &lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;groupfilter(...)&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;branch-&amp;gt;gfilter_result = groupfilter(...);
+if (branch-&amp;gt;gfilter_result == NULL)
+  errExit(&amp;quot;groupfilter(...) returned NULL&amp;quot;);
+else {
+   
+  /* free group filter rules */
+  ...
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;merger(...)&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;fquery-&amp;gt;merger_result = merger(...); 
+  
+if (fquery-&amp;gt;merger_result == NULL)
+  errExit(&amp;quot;merger(...) returned NULL&amp;quot;);
+else {
+    
+    /* free merger rules */	
+    ... 
+}    &lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;References:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/branch_8c.html'&gt;&lt;code&gt;branch&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/structflowquery.html'&gt;&lt;code&gt;flowquery&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(4) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/echo_8h_source.html'&gt;&lt;code&gt;echo&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Complete Execution Engine Profiling</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/11/complete-execution-engine-profiling"/>
+   <updated>2012-04-11T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/11/complete-execution-engine-profiling</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Before:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ git checkout v0.1
+$ valgrind bin/flowy-engine bin/traces-long.ft bin/query.json
+
+==19000== 
+==19000== HEAP SUMMARY:
+==19000== in use at exit: 131,519 bytes in 1,182 blocks
+==19000== total heap usage: 2,609 allocs, 1,427 frees, 1,631,199 bytes allocs
+==19000== 
+==19000== LEAK SUMMARY:
+==19000== definitely lost: 6,912 bytes in 472 blocks
+==19000== indirectly lost: 0 bytes in 0 blocks
+==19000== possibly lost: 0 bytes in 0 blocks
+==19000== still reachable: 124,607 bytes in 710 blocks
+==19000== suppressed: 0 bytes in 0 blocks
+==19000== Rerun with --leak-check=full to see details of leaked memory
+==19000== 
+==19000== For counts of detected and suppressed errors, rerun with: -v
+==19000== Use --track-origins=yes to see where uninitialised values come from
+==19000== ERROR SUMMARY: 75 errors from 10 contexts (suppressed: 1 from 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;After:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ git checkout master
+$ valgrind bin/flowy-engine bin/traces-long.ft bin/query.json
+
+==19164== 
+==19164== HEAP SUMMARY:
+==19164== in use at exit: 20,228 bytes in 37 blocks
+==19164== total heap usage: 3,646 allocs, 3,609 frees, 1,647,767 bytes allocs
+==19164== 
+==19164== LEAK SUMMARY:
+==19164== definitely lost: 0 bytes in 0 blocks
+==19164== indirectly lost: 0 bytes in 0 blocks
+==19164== possibly lost: 0 bytes in 0 blocks
+==19164== still reachable: 20,228 bytes in 37 blocks
+==19164== suppressed: 0 bytes in 0 blocks
+==19164== Rerun with --leak-check=full to see details of leaked memory
+==19164== 
+==19164== For counts of detected and suppressed errors, rerun with: -v
+==19164== Use --track-origins=yes to see where uninitialised values come from
+==19164== ERROR SUMMARY: 300 errors from 6 contexts (suppressed: 1 from 1)	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;20kB&lt;/code&gt; created and still living blocks are due to the following libraries:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;dyld&lt;/code&gt;: all 81 mallocs have these common calls:&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='dyld' src='http://i.stack.imgur.com/KgXih.png' /&gt;&lt;/p&gt;
+
+&lt;p&gt;On GNU/Linux &lt;code&gt;dyld&lt;/code&gt; would be replaced by &lt;code&gt;dlopen&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;{libsystem_c, libsystem_notify, libdispatch}.dylib&lt;/code&gt;: all 10 mallocs have these common calls:&lt;/p&gt;
+
+&lt;p&gt;&lt;img alt='localtime' src='http://i.stack.imgur.com/iIXOH.png' /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;localtime(...)&lt;/code&gt; defined in &lt;code&gt;time.h&lt;/code&gt; uses &lt;code&gt;tzset(...)&lt;/code&gt; to initialize and return me a &lt;code&gt;struct tm*&lt;/code&gt; which I shouldn&amp;#8217;t &lt;code&gt;free&lt;/code&gt; myself because I did not allocate it. They are apparently not my fault. The Mac OS X kernel will (like any Unix-like kernel) recover that memory when the process exits anyway.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</content>
+ </entry>
  
  <entry>
    <title>v2.1: it works</title>
