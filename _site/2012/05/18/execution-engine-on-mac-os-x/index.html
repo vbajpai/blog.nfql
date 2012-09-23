@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Masters Thesis Proposal</title>
+   <title>Execution Engine on Mac OS X</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,14 +26,55 @@
 
     
 <div id="post">
-  <h1>Masters Thesis Proposal</h1>
+  <h1>Execution Engine on Mac OS X</h1>
   <p class="meta">
-    01 February 2012 
+    18 May 2012 
     
   </p>
-  <p>I submitted my thesis proposal today.</p>
+  <p>Tried on Mac OS X 10.7.</p>
 
-<p><a href='https://github.com/downloads/vbajpai/blog.nfql/vbajpai-proposal.pdf'>Masters Thesis Proposal &#8594;</a></p>
+<p>Install <a href='http://mxcl.github.com/homebrew/'>Homebrew &#8594;</a></p>
+
+<p>Install CMake</p>
+
+<pre><code>&gt;&gt; brew install cmake</code></pre>
+
+<p>Install Flow-Tools from source</p>
+
+<pre><code>&gt;&gt; wget http://dl.dropbox.com/u/500389/flow-tools-0.68.4.tar.bz2
+&gt;&gt; tar -xvf flow-tools-0.68.4.tar.bz2
+
+[flow-tools-0.68.4] &gt;&gt; ./configure
+[flow-tools-0.68.4] &gt;&gt; make 
+[flow-tools-0.68.4] &gt;&gt; make install	</code></pre>
+
+<p>Install JSON Manipulation Library Package</p>
+
+<pre><code>&gt;&gt; brew install json-c</code></pre>
+
+<p>Build Engine</p>
+
+<pre><code>[engine] &gt;&gt; make CMAKE_PREFIX_PATH=/usr/local/flow-tools/</code></pre>
+
+<p>Run Engine</p>
+
+<pre><code>[engine] &gt;&gt; bin/engine examples/query-http-tcp-session.json examples/trace.ft</code></pre>
+
+<p>Install Doxygen (optional)</p>
+
+<pre><code>&gt;&gt; brew install doxygen</code></pre>
+
+<p>Install GraphVIZ (optional)</p>
+
+<pre><code>&gt;&gt; brew install graphviz</code></pre>
+
+<p>Generate Documentation (optional)</p>
+
+<pre><code>[engine] &gt;&gt; make doc	</code></pre>
+
+<p>Cleanup</p>
+
+<pre><code>[engine] &gt;&gt; make clean</code></pre>
 </div>
 
 <div id="related">
@@ -44,7 +85,7 @@
     
       <li><span>19 May 2012</span> &raquo; <a href="/2012/05/19/v24-its-portable">v2.4: it's portable</a></li>
     
-      <li><span>18 May 2012</span> &raquo; <a href="/2012/05/18/execution-engine-on-mac-os-x">Execution Engine on Mac OS X</a></li>
+      <li><span>17 May 2012</span> &raquo; <a href="/2012/05/17/execution-engine-on-ubuntu">Execution Engine on Ubuntu</a></li>
     
   </ul>
 </div>

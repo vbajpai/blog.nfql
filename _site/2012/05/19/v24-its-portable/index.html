@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Masters Thesis Proposal</title>
+   <title>v2.4: it's portable</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,14 +26,28 @@
 
     
 <div id="post">
-  <h1>Masters Thesis Proposal</h1>
+  <h1>v2.4: it's portable</h1>
   <p class="meta">
-    01 February 2012 
+    19 May 2012 
     
   </p>
-  <p>I submitted my thesis proposal today.</p>
+  <p>Summary: (since after <code>v0.3</code>)</p>
 
-<p><a href='https://github.com/downloads/vbajpai/blog.nfql/vbajpai-proposal.pdf'>Masters Thesis Proposal &#8594;</a></p>
+<pre><code>&gt;&gt; git show v0.4
+
+tag v0.4
+Tagger: Vaibhav Bajpai &lt;contact@vaibhavbajpai.com&gt;
+Date:   Fri May 18 15:07:42 2012 +0200
+Commit 00c17385e37dd944c9139205a5eb3660c707858a	
+
+*  _GNU_SOURCE feature test MACRO and -std=c99
+*  (__FreeBSD, __APPLE__) and __linux MACROS around qsort_r(…)
+*  reverted to a flat source structure for the CMake build process.
+*  CMake command to call a script to create auto-generated sources and headers.
+*  CMake command to call a scripts in queries/ to put JSON queries in examples/
+*  Makefile to automate invocation of CMake commands.
+*  installation instruction for Ubuntu.
+*  installation instruction for Mac OS X.</code></pre>
 </div>
 
 <div id="related">
@@ -42,9 +56,9 @@
     
       <li><span>31 May 2012</span> &raquo; <a href="/2012/05/31/better-execution-engine-usage-on-run">Better Execution Engine Usage on Run</a></li>
     
-      <li><span>19 May 2012</span> &raquo; <a href="/2012/05/19/v24-its-portable">v2.4: it's portable</a></li>
-    
       <li><span>18 May 2012</span> &raquo; <a href="/2012/05/18/execution-engine-on-mac-os-x">Execution Engine on Mac OS X</a></li>
+    
+      <li><span>17 May 2012</span> &raquo; <a href="/2012/05/17/execution-engine-on-ubuntu">Execution Engine on Ubuntu</a></li>
     
   </ul>
 </div>

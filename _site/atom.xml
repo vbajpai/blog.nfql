@@ -4,13 +4,106 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T20:18:16+02:00</updated>
+ <updated>2012-09-23T20:34:15+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Better Execution Engine Usage on Run</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/05/31/better-execution-engine-usage-on-run"/>
+   <updated>2012-05-31T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/05/31/better-execution-engine-usage-on-run</id>
+   <content type="html">&lt;p&gt;Better Usage:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ bin/engine
+usage: bin/engine [OPTIONS] queryfile tracefile        query the specified trace
+   or: bin/engine [OPTIONS] queryfile -                read the trace from stdin
+
+OPTIONS:
+-d, --debug              enable debugging mode
+-v, --verbose            increase the verbosity level
+-h, --help               display this help and exit
+-V, --version            output version information and exit&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>v2.4: it's portable</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/05/19/v24-its-portable"/>
+   <updated>2012-05-19T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/05/19/v24-its-portable</id>
+   <content type="html">&lt;p&gt;Summary: (since after &lt;code&gt;v0.3&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; git show v0.4
+
+tag v0.4
+Tagger: Vaibhav Bajpai &amp;lt;contact@vaibhavbajpai.com&amp;gt;
+Date:   Fri May 18 15:07:42 2012 +0200
+Commit 00c17385e37dd944c9139205a5eb3660c707858a	
+
+*  _GNU_SOURCE feature test MACRO and -std=c99
+*  (__FreeBSD, __APPLE__) and __linux MACROS around qsort_r(…)
+*  reverted to a flat source structure for the CMake build process.
+*  CMake command to call a script to create auto-generated sources and headers.
+*  CMake command to call a scripts in queries/ to put JSON queries in examples/
+*  Makefile to automate invocation of CMake commands.
+*  installation instruction for Ubuntu.
+*  installation instruction for Mac OS X.&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Execution Engine on Mac OS X</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/05/18/execution-engine-on-mac-os-x"/>
+   <updated>2012-05-18T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/05/18/execution-engine-on-mac-os-x</id>
+   <content type="html">&lt;p&gt;Tried on Mac OS X 10.7.&lt;/p&gt;
+
+&lt;p&gt;Install &lt;a href='http://mxcl.github.com/homebrew/'&gt;Homebrew &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Install CMake&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; brew install cmake&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Flow-Tools from source&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; wget http://dl.dropbox.com/u/500389/flow-tools-0.68.4.tar.bz2
+&amp;gt;&amp;gt; tar -xvf flow-tools-0.68.4.tar.bz2
+
+[flow-tools-0.68.4] &amp;gt;&amp;gt; ./configure
+[flow-tools-0.68.4] &amp;gt;&amp;gt; make 
+[flow-tools-0.68.4] &amp;gt;&amp;gt; make install	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install JSON Manipulation Library Package&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; brew install json-c&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Build Engine&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; make CMAKE_PREFIX_PATH=/usr/local/flow-tools/&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Run Engine&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; bin/engine examples/query-http-tcp-session.json examples/trace.ft&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Doxygen (optional)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; brew install doxygen&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install GraphVIZ (optional)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; brew install graphviz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Generate Documentation (optional)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; make doc	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Cleanup&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; make clean&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
  
  <entry>
    <title>Execution Engine on Ubuntu</title>

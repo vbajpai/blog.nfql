@@ -7,6 +7,9 @@ http://vbajpai.github.com/blog.nfql/pages.html
 http://vbajpai.github.com/blog.nfql/sitemap.txt
 http://vbajpai.github.com/blog.nfql/tags.html
 
+http://vbajpai.github.com/blog.nfql/2012/05/31/better-execution-engine-usage-on-run
+http://vbajpai.github.com/blog.nfql/2012/05/19/v24-its-portable
+http://vbajpai.github.com/blog.nfql/2012/05/18/execution-engine-on-mac-os-x
 http://vbajpai.github.com/blog.nfql/2012/05/17/execution-engine-on-ubuntu
 http://vbajpai.github.com/blog.nfql/2012/05/14/cmake-build-process
 http://vbajpai.github.com/blog.nfql/2012/05/11/porting-the-execution-engine-to-gnulinux
