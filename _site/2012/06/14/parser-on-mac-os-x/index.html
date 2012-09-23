@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>The Execution Engine currently segfaults</title>
+   <title>Parser on Mac OS X</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,21 +26,63 @@
 
     
 <div id="post">
-  <h1>The Execution Engine currently segfaults</h1>
+  <h1>Parser on Mac OS X</h1>
   <p class="meta">
-    23 February 2012 
+    14 June 2012 
     
   </p>
-  <p><img alt='Imgur' src='http://i.imgur.com/qiyVa.png' /></p>
+  <p>Install <a href='http://mxcl.github.com/homebrew/'>Homebrew &#8594;</a></p>
 
-<pre><code>$ cflow --format=posix --omit-arguments flowy.c
-    1 main: int (), &lt;flowy.c 200&gt;
-    6     ft_open: &lt;&gt;
-   14     branch_start: void * (), &lt;flowy.c 146&gt;
-   15         filter: char ** (), &lt;flowy.c 57&gt;
-   22         grouper: &lt;&gt;</code></pre>
+<p>Install Python</p>
 
-<p>So essentially the <code>build_record_trees(…)</code> function segfaults when it calls <code>qsort_r(…)</code>. Need to investigate on it &#8230;</p>
+<pre><code>$ brew install python --framework</code></pre>
+
+<p>Put <code>easy_install</code> in PATH</p>
+
+<pre><code>$ export PATH=/usr/local/share/python:$PATH</code></pre>
+
+<p>Setup the Python Packaging Virtual Environment</p>
+
+<pre><code>$ easy_install pip
+$ pip install pip --upgrade
+$ pip install virtualenv
+$ pip install virtualenvwrapper
+$ source /usr/local/bin/virtualenvwrapper.sh</code></pre>
+
+<p>Install External Dependencies</p>
+
+<pre><code>$ brew install hdf5
+$ brew install lzo   </code></pre>
+
+<p>Create a Virtual Environment</p>
+
+<pre><code>[parser] $ mkvirtualenv parser</code></pre>
+
+<p>Install Python Dependencies</p>
+
+<pre><code>(parser)
+[parser] $ make</code></pre>
+
+<p>List the Installed Dependencies</p>
+
+<pre><code>(parser)
+[parser] $ pip freeze	</code></pre>
+
+<p>Cleanup:</p>
+
+<p>Remove the build files</p>
+
+<pre><code>(parser)
+[parser] $ make clean</code></pre>
+
+<p>Deactivate the Virtual Environment</p>
+
+<pre><code>(parser)
+[parser] $ deactivate</code></pre>
+
+<p>Destroy the Virtual Environment</p>
+
+<pre><code>[parser] $ rmvirtualenv parser</code></pre>
 </div>
 
 <div id="related">
@@ -51,7 +93,7 @@
     
       <li><span>14 Jun 2012</span> &raquo; <a href="/2012/06/14/parser-on-ubuntu">Parser on Ubuntu</a></li>
     
-      <li><span>14 Jun 2012</span> &raquo; <a href="/2012/06/14/parser-on-mac-os-x">Parser on Mac OS X</a></li>
+      <li><span>13 Jun 2012</span> &raquo; <a href="/2012/06/13/packaging-the-parser">Packaging the Parser</a></li>
     
   </ul>
 </div>

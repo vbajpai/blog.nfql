@@ -4,13 +4,147 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T21:09:27+02:00</updated>
+ <updated>2012-09-23T21:29:05+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Regression Test Suite for the Execution Engine</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/16/regression-test-suite-for-the-execution-engine"/>
+   <updated>2012-06-16T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/16/regression-test-suite-for-the-execution-engine</id>
+   <content type="html">&lt;p&gt;A regression test-suite has been added in &lt;code&gt;tests/&lt;/code&gt;. The test &lt;code&gt;asserts&lt;/code&gt; the numbers of items in each stage of the pipeline for each query and for each trace in &lt;code&gt;--debug&lt;/code&gt; mode. It also looks for &lt;code&gt;segfaults&lt;/code&gt; that might have occured in any particular query-trace combination.&lt;/p&gt;
+
+&lt;p&gt;To run the complete regression test-suite:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] $ make
+[engine] $ tests/regression.py [-v]
+............................................................
+----------------------------------------------------------------------
+Ran 60 tests in 32.533s
+
+OK&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Regression tests can also be run individually on a specific example query type:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] $ tests/test-query-http-tcp-session.py [-v]
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 8.672s
+
+OK	&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Parser on Ubuntu</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/14/parser-on-ubuntu"/>
+   <updated>2012-06-14T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/14/parser-on-ubuntu</id>
+   <content type="html">&lt;p&gt;Install External Dependencies&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ sudo apt-get install libhdf5-serial-dev
+$ sudo apt-get install liblzo2-dev&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Setup the Python Packaging Virtual Environment&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ sudo apt-get install python-pip
+$ sudo pip install pip --upgrade
+$ sudo pip install virtualenv
+$ sudo pip install virtualenvwrapper&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create a Virtual Environment&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[parser] $ mkvirtualenv parser&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Python Dependencies&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(parser)
+[parser] $ make&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;List the Installed Dependencies&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(parser)
+[parser] $ pip freeze&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Cleanup:&lt;/p&gt;
+
+&lt;p&gt;Remove the build files&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(parser)
+[parser] $ make clean&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Deactivate the Virtual Environment&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(parser)
+[parser] $ deactivate&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Destroy the Virtual Environment&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[parser] $ rmvirtualenv parser	&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Parser on Mac OS X</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/14/parser-on-mac-os-x"/>
+   <updated>2012-06-14T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/14/parser-on-mac-os-x</id>
+   <content type="html">&lt;p&gt;Install &lt;a href='http://mxcl.github.com/homebrew/'&gt;Homebrew &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Install Python&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ brew install python --framework&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Put &lt;code&gt;easy_install&lt;/code&gt; in PATH&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ export PATH=/usr/local/share/python:$PATH&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Setup the Python Packaging Virtual Environment&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ easy_install pip
+$ pip install pip --upgrade
+$ pip install virtualenv
+$ pip install virtualenvwrapper
+$ source /usr/local/bin/virtualenvwrapper.sh&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install External Dependencies&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ brew install hdf5
+$ brew install lzo   &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create a Virtual Environment&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[parser] $ mkvirtualenv parser&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Python Dependencies&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(parser)
+[parser] $ make&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;List the Installed Dependencies&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(parser)
+[parser] $ pip freeze	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Cleanup:&lt;/p&gt;
+
+&lt;p&gt;Remove the build files&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(parser)
+[parser] $ make clean&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Deactivate the Virtual Environment&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(parser)
+[parser] $ deactivate&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Destroy the Virtual Environment&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[parser] $ rmvirtualenv parser&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
  
  <entry>
    <title>Packaging the Parser</title>

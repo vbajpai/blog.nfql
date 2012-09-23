@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>The Execution Engine currently segfaults</title>
+   <title>Regression Test Suite for the Execution Engine</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,32 +26,42 @@
 
     
 <div id="post">
-  <h1>The Execution Engine currently segfaults</h1>
+  <h1>Regression Test Suite for the Execution Engine</h1>
   <p class="meta">
-    23 February 2012 
+    16 June 2012 
     
   </p>
-  <p><img alt='Imgur' src='http://i.imgur.com/qiyVa.png' /></p>
+  <p>A regression test-suite has been added in <code>tests/</code>. The test <code>asserts</code> the numbers of items in each stage of the pipeline for each query and for each trace in <code>--debug</code> mode. It also looks for <code>segfaults</code> that might have occured in any particular query-trace combination.</p>
 
-<pre><code>$ cflow --format=posix --omit-arguments flowy.c
-    1 main: int (), &lt;flowy.c 200&gt;
-    6     ft_open: &lt;&gt;
-   14     branch_start: void * (), &lt;flowy.c 146&gt;
-   15         filter: char ** (), &lt;flowy.c 57&gt;
-   22         grouper: &lt;&gt;</code></pre>
+<p>To run the complete regression test-suite:</p>
 
-<p>So essentially the <code>build_record_trees(…)</code> function segfaults when it calls <code>qsort_r(…)</code>. Need to investigate on it &#8230;</p>
+<pre><code>[engine] $ make
+[engine] $ tests/regression.py [-v]
+............................................................
+----------------------------------------------------------------------
+Ran 60 tests in 32.533s
+
+OK</code></pre>
+
+<p>Regression tests can also be run individually on a specific example query type:</p>
+
+<pre><code>[engine] $ tests/test-query-http-tcp-session.py [-v]
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 8.672s
+
+OK	</code></pre>
 </div>
 
 <div id="related">
   <h2>Related Posts</h2>
   <ul class="posts">
     
-      <li><span>16 Jun 2012</span> &raquo; <a href="/2012/06/16/regression-test-suite-for-the-execution-engine">Regression Test Suite for the Execution Engine</a></li>
-    
       <li><span>14 Jun 2012</span> &raquo; <a href="/2012/06/14/parser-on-ubuntu">Parser on Ubuntu</a></li>
     
       <li><span>14 Jun 2012</span> &raquo; <a href="/2012/06/14/parser-on-mac-os-x">Parser on Mac OS X</a></li>
+    
+      <li><span>13 Jun 2012</span> &raquo; <a href="/2012/06/13/packaging-the-parser">Packaging the Parser</a></li>
     
   </ul>
 </div>
