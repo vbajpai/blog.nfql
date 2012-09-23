@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>v2.0: it's a start</title>
+   <title>Clubbing Together the Hardcoded Rules</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,34 +26,60 @@
 
     
 <div id="post">
-  <h1>v2.0: it's a start</h1>
+  <h1>Clubbing Together the Hardcoded Rules</h1>
   <p class="meta">
-    20 February 2012 
+    26 March 2012 
     
   </p>
-  <p>The evolution of the core of the former Python implementation in C.</p>
+  <ul>
+<li>
+<p>clubbed number of rules into one place in (1)</p>
 
-<pre><code>&gt;&gt; git show v0.0
+<pre><code>/* this should go away once the rules come from the JSON */		
+#define NUM_BRANCHES 2
+#define NUM_FILTER_RULES_BRANCH1 1
+#define NUM_FILTER_RULES_BRANCH2 1
+#define NUM_GROUPER_RULES_BRANCH1 2
+#define NUM_GROUPER_RULES_BRANCH2 2
+#define NUM_GROUPER_AGGREGATION_RULES_BRANCH1 4
+#define NUM_GROUPER_AGGREGATION_RULES_BRANCH2 4
+#define NUM_GROUP_FILTER_RULES_BRANCH1 1
+#define NUM_GROUP_FILTER_RULES_BRANCH2 1
+#define NUM_MERGER_RULES 2        </code></pre>
+</li>
 
-tag v0.0
-Tagger: Vaibhav Bajpai &lt;contact@vaibhavbajpai.com&gt;
-Date:   Thu May 17 10:48:02 2012 +0200
-Commit 8cb309c8a956c99e6b1494eddb601c8f6a520696
+<li>
+<p>Instead of manually filling up structs of each branch as shown below: <span>2</span></p>
 
-* read flow-records into memory
-* rewrite of the execution pipeline in C (non functional)
-* efficient rule processing with dedicated function pointers
-* reduced grouper complexity using qsort(...) and bsearch(...)
-* concerns
-        - flow query is currently hardcoded in pipeline structs
-        - functions assume specific uintX_t offsets
-        - numerous grouper segfaults
-        - no group filter
-        - commented out merger (segfaults when uncommented)
-        - no ungrouper
-        - code dependent on GNU99 extensions
-        - some headers are missing include guards
-        - unused extraneous source files and headers</code></pre>
+<pre><code>-  binfos[0].branch_id = 0;
+-  binfos[0].filter_rules = filter_rules_branch1;
+-  binfos[0].num_filter_rules = 1;
+   ...
+   		
+-  binfos[1].branch_id = 1;
+-  binfos[1].filter_rules = filter_rules_branch2;
+-  binfos[1].num_filter_rules = 1;
+   ...</code></pre>
+
+<p>The number of branches and rules come from <code>flowy.h</code> and the code now loops through the rules to assign values (2).</p>
+
+<pre><code>+  /* rules for each branch */
++  for (int i = 0; i &lt; fquery-&gt;num_branches; i++) {
+   
++    struct filter_rule* frule = calloc(fquery-&gt;branches[i].num_filter_rules, 
++                                       sizeof(struct filter_rule));    
++    for (int j = 0; j &lt; fquery-&gt;branches[i].num_filter_rules; j++) {
++      ...
++    }
++  ...		  </code></pre>
+
+<p>Rules are still hardcoded but now they are in one place. It will make debugging and transitioning to <code>JSON</code> queries easier.</p>
+</li>
+</ul>
+
+<p>Resources:</p>
+
+<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8h_source.html'><code>flowy.h</code> reference &#8594;</a><br />(2) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'><code>flowy.c</code> reference &#8594;</a></p>
 </div>
 
 <div id="related">

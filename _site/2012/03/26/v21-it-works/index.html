@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>v2.0: it's a start</title>
+   <title>v2.1: it works</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,45 +26,46 @@
 
     
 <div id="post">
-  <h1>v2.0: it's a start</h1>
+  <h1>v2.1: it works</h1>
   <p class="meta">
-    20 February 2012 
+    26 March 2012 
     
   </p>
-  <p>The evolution of the core of the former Python implementation in C.</p>
+  <p>The complete pipeline now works for the first time, tagged as <code>v0.1</code></p>
 
-<pre><code>&gt;&gt; git show v0.0
+<pre><code>$ git show v0.1
 
-tag v0.0
+tag v0.1		
 Tagger: Vaibhav Bajpai &lt;contact@vaibhavbajpai.com&gt;
-Date:   Thu May 17 10:48:02 2012 +0200
-Commit 8cb309c8a956c99e6b1494eddb601c8f6a520696
+Date:   Fri Apr 6 19:07:49 2012 +0200	
+Commit a8a67a13aa07f671d21d062537a2ef17e58dcc07
+...
 
-* read flow-records into memory
-* rewrite of the execution pipeline in C (non functional)
-* efficient rule processing with dedicated function pointers
-* reduced grouper complexity using qsort(...) and bsearch(...)
-* concerns
-        - flow query is currently hardcoded in pipeline structs
-        - functions assume specific uintX_t offsets
-        - numerous grouper segfaults
-        - no group filter
-        - commented out merger (segfaults when uncommented)
-        - no ungrouper
-        - code dependent on GNU99 extensions
-        - some headers are missing include guards
-        - unused extraneous source files and headers</code></pre>
+* reverse engineered parser to generate UML.
+* froze requirements to allow single step installation of the python parser.
+* doxygen documentation of the engine.
+* prelim JSON parsing framework for the parser and engine.
+* replaced GNU99 extensions dependent code with c99.
+* resolved numerous segfaults in grouper and merger.
+* generated group aggregations as a separate (cooked) NetFlow v5 record.
+* flexible group aggregations with no uintX_t assumptions on field offsets.
+* first-ever group filter implementation.
+* reorganized the src/ directory structure
+* enabled multiple verbosity levels in the engine.
+* first-ever merger implementation.
+* flexible filters and group filters with no uintX_t assumptions on field offsets.
+* first-ever ungrouper implementation.</code></pre>
 </div>
 
 <div id="related">
   <h2>Related Posts</h2>
   <ul class="posts">
     
-      <li><span>26 Mar 2012</span> &raquo; <a href="/2012/03/26/v21-it-works">v2.1: it works</a></li>
-    
       <li><span>26 Mar 2012</span> &raquo; <a href="/2012/03/26/ungrouper-implementation">Ungrouper Implementation</a></li>
     
       <li><span>26 Mar 2012</span> &raquo; <a href="/2012/03/26/flexible-group-filters-and-aggregations">Flexible Group Filters and Aggregations</a></li>
+    
+      <li><span>26 Mar 2012</span> &raquo; <a href="/2012/03/26/clubbing-together-the-hardcoded-rules">Clubbing Together the Hardcoded Rules</a></li>
     
   </ul>
 </div>

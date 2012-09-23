@@ -4,13 +4,44 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T11:55:38+02:00</updated>
+ <updated>2012-09-23T12:02:24+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>v2.1: it works</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/26/v21-it-works"/>
+   <updated>2012-03-26T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/26/v21-it-works</id>
+   <content type="html">&lt;p&gt;The complete pipeline now works for the first time, tagged as &lt;code&gt;v0.1&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ git show v0.1
+
+tag v0.1		
+Tagger: Vaibhav Bajpai &amp;lt;contact@vaibhavbajpai.com&amp;gt;
+Date:   Fri Apr 6 19:07:49 2012 +0200	
+Commit a8a67a13aa07f671d21d062537a2ef17e58dcc07
+...
+
+* reverse engineered parser to generate UML.
+* froze requirements to allow single step installation of the python parser.
+* doxygen documentation of the engine.
+* prelim JSON parsing framework for the parser and engine.
+* replaced GNU99 extensions dependent code with c99.
+* resolved numerous segfaults in grouper and merger.
+* generated group aggregations as a separate (cooked) NetFlow v5 record.
+* flexible group aggregations with no uintX_t assumptions on field offsets.
+* first-ever group filter implementation.
+* reorganized the src/ directory structure
+* enabled multiple verbosity levels in the engine.
+* first-ever merger implementation.
+* flexible filters and group filters with no uintX_t assumptions on field offsets.
+* first-ever ungrouper implementation.&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
  
  <entry>
    <title>Ungrouper Implementation</title>
@@ -147,6 +178,62 @@ aggr_function = get_aggr_fptr( binfo-&amp;gt;filter_rules[i].op );
 &lt;p&gt;Resources:&lt;/p&gt;
 
 &lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/auto__assign_8c.html'&gt;&lt;code&gt;auto_assign&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/fun__gen_8py.html'&gt;&lt;code&gt;fun_gen&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(4) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8c.html'&gt;&lt;code&gt;grouper&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(5) &lt;a href='http://en.wikipedia.org/wiki/Greenspun&amp;apos;s_tenth_rule'&gt;greenspun&amp;#8217;s tenth rule, wikipedia &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Clubbing Together the Hardcoded Rules</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/26/clubbing-together-the-hardcoded-rules"/>
+   <updated>2012-03-26T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/26/clubbing-together-the-hardcoded-rules</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;clubbed number of rules into one place in (1)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/* this should go away once the rules come from the JSON */		
+#define NUM_BRANCHES 2
+#define NUM_FILTER_RULES_BRANCH1 1
+#define NUM_FILTER_RULES_BRANCH2 1
+#define NUM_GROUPER_RULES_BRANCH1 2
+#define NUM_GROUPER_RULES_BRANCH2 2
+#define NUM_GROUPER_AGGREGATION_RULES_BRANCH1 4
+#define NUM_GROUPER_AGGREGATION_RULES_BRANCH2 4
+#define NUM_GROUP_FILTER_RULES_BRANCH1 1
+#define NUM_GROUP_FILTER_RULES_BRANCH2 1
+#define NUM_MERGER_RULES 2        &lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Instead of manually filling up structs of each branch as shown below: &lt;span&gt;2&lt;/span&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;-  binfos[0].branch_id = 0;
+-  binfos[0].filter_rules = filter_rules_branch1;
+-  binfos[0].num_filter_rules = 1;
+   ...
+   		
+-  binfos[1].branch_id = 1;
+-  binfos[1].filter_rules = filter_rules_branch2;
+-  binfos[1].num_filter_rules = 1;
+   ...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The number of branches and rules come from &lt;code&gt;flowy.h&lt;/code&gt; and the code now loops through the rules to assign values (2).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;+  /* rules for each branch */
++  for (int i = 0; i &amp;lt; fquery-&amp;gt;num_branches; i++) {
+   
++    struct filter_rule* frule = calloc(fquery-&amp;gt;branches[i].num_filter_rules, 
++                                       sizeof(struct filter_rule));    
++    for (int j = 0; j &amp;lt; fquery-&amp;gt;branches[i].num_filter_rules; j++) {
++      ...
++    }
++  ...		  &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Rules are still hardcoded but now they are in one place. It will make debugging and transitioning to &lt;code&gt;JSON&lt;/code&gt; queries easier.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8h_source.html'&gt;&lt;code&gt;flowy.h&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy.c&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
  </entry>
  
  <entry>
