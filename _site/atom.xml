@@ -4,13 +4,263 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T19:51:46+02:00</updated>
+ <updated>2012-09-23T20:18:16+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Execution Engine on Ubuntu</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/05/17/execution-engine-on-ubuntu"/>
+   <updated>2012-05-17T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/05/17/execution-engine-on-ubuntu</id>
+   <content type="html">&lt;p&gt;Tried on Ubuntu 10.04 (LTS) x86_64 and 12.04 (LTS) x86_64&lt;/p&gt;
+
+&lt;p&gt;Install CMake&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; sudo apt-get install cmake&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Flow-tool Development Package&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; sudo apt-get install flow-tools-dev	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Compression Library Development Package&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; sudo apt-get install zlib1g-dev&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install JSON Manipulation Library Development Package&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; sudo apt-get install libjson0-dev&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Build Engine&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; make&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Run Engine&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; bin/engine examples/query-http-tcp-session.json examples/trace.ft&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Doxygen (optional)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; sudo apt-get install doxygen&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install GraphVIZ (optional)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; sudo apt-get install graphviz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Generate Documentation (optional)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; make doc&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Cleanup&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; make clean&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>CMake Build Process</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/05/14/cmake-build-process"/>
+   <updated>2012-05-14T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/05/14/cmake-build-process</id>
+   <content type="html">&lt;p&gt;Reverting to a flat source structure.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; import this
+The Zen of Python, by Tim Peters
+...
+Flat is better than nested.
+...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The previous source structure was unnecesarily nested for the simple number of source files that we have. Switching to a flat source structure reduced the CMake compilation complexity alot. This is how it looks like now:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; tree
+.
+|-- examples/
+|   `-- trace.ft
+|-- include/
+|   |-- base.h
+|   |-- branch.h
+|   |-- echo.h
+|   |-- errorhandlers.h
+|   |-- filter.h
+|   |-- flowy.h
+|   |-- ftreader.h
+|   |-- grouper.h
+|   |-- groupfilter.h
+|   |-- merger.h
+|   |-- pipeline.h
+|   |-- ungrouper.h
+|   `-- utils.h
+|-- scripts/
+|   |-- queries/
+|   |   |-- build-ftp-tcp-session.py*
+|   |   |-- build-http-octets.py*
+|   |   |-- build-http-tcp-session.py*
+|   |   `-- build-https-tcp-session.py*
+|   `-- generate-functions.py*
+|-- src/
+|   |-- base.c
+|   |-- branch.c
+|   |-- echo.c
+|   |-- errorhandlers.c
+|   |-- filter.c
+|   |-- flowy.c
+|   |-- ftreader.c
+|   |-- grouper.c
+|   |-- groupfilter.c
+|   |-- merger.c
+|   |-- ungrouper.c
+|   `-- utils.c
+|-- CMakeLists.txt
+|-- Doxyfile
+|-- Makefile
+`-- README.md&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;CMake compilation creates a &lt;code&gt;.build/&lt;/code&gt; and puts the executable binary in &lt;code&gt;bin/&lt;/code&gt;. The auto generated C sources and headers goto &lt;code&gt;.build/&lt;/code&gt; as well and are automatically included and linked in the final binary.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# custom command to prepare auto-generated sources
+add_custom_command (
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/auto-assign.h
+         ${CMAKE_CURRENT_BINARY_DIR}/auto-assign.c
+         ${CMAKE_CURRENT_BINARY_DIR}/auto-comps.h
+         ${CMAKE_CURRENT_BINARY_DIR}/auto-comps.c
+  COMMAND python ${CMAKE_SOURCE_DIR}/scripts/generate-functions.py
+  COMMENT &amp;quot;Generating: auto-comps{h,c} and auto-assign.{h,c}&amp;quot;
+)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;CMake compilation also runs the build query scripts defined in &lt;code&gt;scripts/queries/&lt;/code&gt; to generate some examples &lt;code&gt;JSON&lt;/code&gt; queries and moves them to the &lt;code&gt;examples/&lt;/code&gt; folder ready to be used by the &lt;code&gt;bin/engine&lt;/code&gt; binary.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# custom command to generate examples
+file(GLOB pyFILES ${CMAKE_SOURCE_DIR}/scripts/queries/*.py)
+foreach(pyFILE ${pyFILES})
+  set(query &amp;quot;${pyFILE}_query&amp;quot;)
+  add_custom_command (
+    OUTPUT ${query}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/
+    COMMAND python ${pyFILE}
+    COMMENT &amp;quot;Generating: JSON example query using ${pyFILE}&amp;quot;
+  )
+  list(APPEND queryFILES ${query})
+endforeach(pyFILE)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In order to avoid doing -&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] &amp;gt;&amp;gt; mkdir .build
+[engine] &amp;gt;&amp;gt; cd .build
+[.build] &amp;gt;&amp;gt; cmake ..
+[.build] &amp;gt;&amp;gt; make
+[.build] &amp;gt;&amp;gt; cd ..
+[engine] &amp;gt;&amp;gt; rm -r .build&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;taking inspiration from Dirk Joel-Luchini Colbry (1), I am using a Makefile that calls CMake to automate this operation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;make: build/Makefile
+  (cd .build; make)
+
+build/Makefile: build
+  (cd .build; cmake -D CMAKE_PREFIX_PATH=$(CMAKE_PREFIX_PATH) ..)
+
+build:
+  mkdir -p .build&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Additional targets to &lt;code&gt;clean&lt;/code&gt; and generate Doxygen documentation &lt;code&gt;doc&lt;/code&gt; also exist. The generated documentation goes in &lt;code&gt;doc/&lt;/code&gt; and is subsequently deleted by &lt;code&gt;make clean&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;doc: Doxyfile
+  (mkdir -p doc; doxygen Doxyfile)
+
+clean:
+  rm -f -r .build
+  rm -f -r bin
+  rm -f -r doc
+  rm -f -r examples/*.json&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Makefile can also take &lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; as an argument and pass it on to CMake. &lt;code&gt;CMAKE_PREFIX_PATH&lt;/code&gt; is used to supply arbitrary location of external libraries and include PATHS.&lt;/p&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='https://wiki.hpcc.msu.edu/display/~colbrydi@msu.edu/2010/08/19/Cmake+Makefile'&gt;CMake Makefile &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Porting the Execution Engine to GNU/Linux</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/05/11/porting-the-execution-engine-to-gnulinux"/>
+   <updated>2012-05-11T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/05/11/porting-the-execution-engine-to-gnulinux</id>
+   <content type="html">&lt;p&gt;&lt;code&gt;glibc&lt;/code&gt; manual (1) defines &lt;code&gt;_GNU_SOURCE&lt;/code&gt; as -&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;If you define this macro, everything is included: &lt;br /&gt;ISO C89, ISO C99, POSIX.1, POSIX.2, BSD, SVID, X/Open, LFS, and GNU extensions.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Since the &lt;code&gt;flow-tools&lt;/code&gt; library is based on BSD specific headers. Adding &lt;code&gt;_GNU_SOURCE&lt;/code&gt; brought the features from both world when trying to compile on GNU/Linux.&lt;/p&gt;
+
+&lt;p&gt;The order of arguments of &lt;code&gt;qsort_r(...)&lt;/code&gt; apparantely are different on &lt;code&gt;glibc&lt;/code&gt; and &lt;code&gt;BSD&lt;/code&gt; (2)&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;glibc:&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;extern void qsort_r (
+                      void *__base, 
+                      size_t __nmemb, 
+                      size_t __size,
+                      __compar_d_fn_t __compar, 
+                      void *__arg) __nonnull ((1, 4)
+                    );&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;BSD:&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void qsort_r (
+               void *base, 
+               size_t nel, 
+               size_t width, 
+               void *thunk,
+               int (*compar)(void *, const void *, const void *)
+             );&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The invocation of &lt;code&gt;qsort_r(...)&lt;/code&gt; (3) was wrapped around platform specific MACROS.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;+#if defined(__APPLE__) || defined(__FreeBSD__)
+    qsort_r (
+              sorted_recordset_ref, 
+              num_filtered_records, 
+              sizeof(char **), 
+              (void*)&amp;amp;grouper_ruleset[0]-&amp;gt;field_offset2,
+              gtype-&amp;gt;qsort_comp
+            );
+
++#elif defined(__linux)
++    qsort_r (
++             sorted_recordset_ref, 
++             num_filtered_records, 
++             sizeof(char **), 
++             gtype-&amp;gt;qsort_comp,
++             (void*)&amp;amp;grouper_ruleset[0]-&amp;gt;field_offset2
++            );
++#endif&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where &lt;code&gt;gtype-&amp;gt;qsort_comp&lt;/code&gt; (3) is -&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct grouper_type {
+
++#if defined (__APPLE__) || defined (__FreeBSD__)
+   int (*qsort_comp)(
+                     void*                           thunk,
+                     const void*                     e1,
+                     const void*                     e2
+                    );
++#elif defined (__linux)
++  int (*qsort_comp)(
++                    const void*                     e1,
++                    const void*                     e2,
++                    void*                           thunk
++                   );
++#endif&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://www.gnu.org/software/libc/manual/html_node/Feature-Test-Macros.html'&gt;feature test macros &lt;span&gt;&lt;code&gt;glibc&lt;/code&gt; manual&lt;/span&gt; &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://sourceware.org/ml/libc-alpha/2008-12/msg00003.html'&gt;&lt;code&gt;qsort_r&lt;/code&gt; argument order &lt;span&gt;&lt;code&gt;glibc&lt;/code&gt; mailing list&lt;/span&gt; &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8c.html'&gt;&lt;code&gt;grouper&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
  
  <entry>
    <title>v2.3: it's flexible</title>

@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Reading Multiple Traces from stdin</title>
+   <title>Execution Engine on Ubuntu</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,34 +26,63 @@
 
     
 <div id="post">
-  <h1>Reading Multiple Traces from stdin</h1>
+  <h1>Execution Engine on Ubuntu</h1>
   <p class="meta">
-    20 April 2012 
+    17 May 2012 
     
   </p>
-  <p>The engine can now read traces from <code>stdin</code>.<br />This means, now we can concatenate multiple traces using <code>flow-cat</code> and then pipe them in to the engine for processing -</p>
+  <p>Tried on Ubuntu 10.04 (LTS) x86_64 and 12.04 (LTS) x86_64</p>
 
-<pre><code>flow-cat $TRACE[s] | bin/engine $QUERY -</code></pre>
+<p>Install CMake</p>
 
-<p>A typical query to find all the HTTP (over TCP) sessions for April resulted in 285 streams and took around 2 minutes.</p>
+<pre><code>&gt;&gt; sudo apt-get install cmake</code></pre>
 
-<pre><code>&gt;&gt; time flow-cat /Netflow/ft-data/2012/2012-04 | \
-   bin/engine examples/query-http-tcp-session.json -
+<p>Install Flow-tool Development Package</p>
 
-No. of Streams: 285
---------------- 
-...</code></pre>
+<pre><code>&gt;&gt; sudo apt-get install flow-tools-dev	</code></pre>
+
+<p>Install Compression Library Development Package</p>
+
+<pre><code>&gt;&gt; sudo apt-get install zlib1g-dev</code></pre>
+
+<p>Install JSON Manipulation Library Development Package</p>
+
+<pre><code>&gt;&gt; sudo apt-get install libjson0-dev</code></pre>
+
+<p>Build Engine</p>
+
+<pre><code>[engine] &gt;&gt; make</code></pre>
+
+<p>Run Engine</p>
+
+<pre><code>[engine] &gt;&gt; bin/engine examples/query-http-tcp-session.json examples/trace.ft</code></pre>
+
+<p>Install Doxygen (optional)</p>
+
+<pre><code>&gt;&gt; sudo apt-get install doxygen</code></pre>
+
+<p>Install GraphVIZ (optional)</p>
+
+<pre><code>&gt;&gt; sudo apt-get install graphviz</code></pre>
+
+<p>Generate Documentation (optional)</p>
+
+<pre><code>[engine] &gt;&gt; make doc</code></pre>
+
+<p>Cleanup</p>
+
+<pre><code>[engine] &gt;&gt; make clean</code></pre>
 </div>
 
 <div id="related">
   <h2>Related Posts</h2>
   <ul class="posts">
     
-      <li><span>17 May 2012</span> &raquo; <a href="/2012/05/17/execution-engine-on-ubuntu">Execution Engine on Ubuntu</a></li>
-    
       <li><span>14 May 2012</span> &raquo; <a href="/2012/05/14/cmake-build-process">CMake Build Process</a></li>
     
       <li><span>11 May 2012</span> &raquo; <a href="/2012/05/11/porting-the-execution-engine-to-gnulinux">Porting the Execution Engine to GNU/Linux</a></li>
+    
+      <li><span>27 Apr 2012</span> &raquo; <a href="/2012/04/27/v23-its-flexible">v2.3: it's flexible</a></li>
     
   </ul>
 </div>

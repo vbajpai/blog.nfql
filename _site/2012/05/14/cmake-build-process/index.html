@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>CMake Build Process</title>
+   <meta name="author" content="Vaibhav Bajpai" />
+   <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/assets/themes/tom/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/assets/themes/tom/css/screen.css" type="text/css" media="screen, projection" />
+
+   <!-- Typekit -->
+   <script type="text/javascript" src="http://use.typekit.com/jpd0pfm.js"></script>
+   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+<body>
+
+  <div class="site">
+    <div class="title">
+      <a href="/">NFQL</a>
+    </div>
+
+    
+<div id="post">
+  <h1>CMake Build Process</h1>
+  <p class="meta">
+    14 May 2012 
+    
+  </p>
+  <p>Reverting to a flat source structure.</p>
+
+<pre><code>&gt;&gt;&gt; import this
+The Zen of Python, by Tim Peters
+...
+Flat is better than nested.
+...</code></pre>
+
+<p>The previous source structure was unnecesarily nested for the simple number of source files that we have. Switching to a flat source structure reduced the CMake compilation complexity alot. This is how it looks like now:</p>
+
+<pre><code>[engine] &gt;&gt; tree
+.
+|-- examples/
+|   `-- trace.ft
+|-- include/
+|   |-- base.h
+|   |-- branch.h
+|   |-- echo.h
+|   |-- errorhandlers.h
+|   |-- filter.h
+|   |-- flowy.h
+|   |-- ftreader.h
+|   |-- grouper.h
+|   |-- groupfilter.h
+|   |-- merger.h
+|   |-- pipeline.h
+|   |-- ungrouper.h
+|   `-- utils.h
+|-- scripts/
+|   |-- queries/
+|   |   |-- build-ftp-tcp-session.py*
+|   |   |-- build-http-octets.py*
+|   |   |-- build-http-tcp-session.py*
+|   |   `-- build-https-tcp-session.py*
+|   `-- generate-functions.py*
+|-- src/
+|   |-- base.c
+|   |-- branch.c
+|   |-- echo.c
+|   |-- errorhandlers.c
+|   |-- filter.c
+|   |-- flowy.c
+|   |-- ftreader.c
+|   |-- grouper.c
+|   |-- groupfilter.c
+|   |-- merger.c
+|   |-- ungrouper.c
+|   `-- utils.c
+|-- CMakeLists.txt
+|-- Doxyfile
+|-- Makefile
+`-- README.md</code></pre>
+
+<p>CMake compilation creates a <code>.build/</code> and puts the executable binary in <code>bin/</code>. The auto generated C sources and headers goto <code>.build/</code> as well and are automatically included and linked in the final binary.</p>
+
+<pre><code># custom command to prepare auto-generated sources
+add_custom_command (
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/auto-assign.h
+         ${CMAKE_CURRENT_BINARY_DIR}/auto-assign.c
+         ${CMAKE_CURRENT_BINARY_DIR}/auto-comps.h
+         ${CMAKE_CURRENT_BINARY_DIR}/auto-comps.c
+  COMMAND python ${CMAKE_SOURCE_DIR}/scripts/generate-functions.py
+  COMMENT &quot;Generating: auto-comps{h,c} and auto-assign.{h,c}&quot;
+)</code></pre>
+
+<p>CMake compilation also runs the build query scripts defined in <code>scripts/queries/</code> to generate some examples <code>JSON</code> queries and moves them to the <code>examples/</code> folder ready to be used by the <code>bin/engine</code> binary.</p>
+
+<pre><code># custom command to generate examples
+file(GLOB pyFILES ${CMAKE_SOURCE_DIR}/scripts/queries/*.py)
+foreach(pyFILE ${pyFILES})
+  set(query &quot;${pyFILE}_query&quot;)
+  add_custom_command (
+    OUTPUT ${query}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/
+    COMMAND python ${pyFILE}
+    COMMENT &quot;Generating: JSON example query using ${pyFILE}&quot;
+  )
+  list(APPEND queryFILES ${query})
+endforeach(pyFILE)</code></pre>
+
+<p>In order to avoid doing -</p>
+
+<pre><code>[engine] &gt;&gt; mkdir .build
+[engine] &gt;&gt; cd .build
+[.build] &gt;&gt; cmake ..
+[.build] &gt;&gt; make
+[.build] &gt;&gt; cd ..
+[engine] &gt;&gt; rm -r .build</code></pre>
+
+<p>taking inspiration from Dirk Joel-Luchini Colbry (1), I am using a Makefile that calls CMake to automate this operation.</p>
+
+<pre><code>make: build/Makefile
+  (cd .build; make)
+
+build/Makefile: build
+  (cd .build; cmake -D CMAKE_PREFIX_PATH=$(CMAKE_PREFIX_PATH) ..)
+
+build:
+  mkdir -p .build</code></pre>
+
+<p>Additional targets to <code>clean</code> and generate Doxygen documentation <code>doc</code> also exist. The generated documentation goes in <code>doc/</code> and is subsequently deleted by <code>make clean</code>.</p>
+
+<pre><code>doc: Doxyfile
+  (mkdir -p doc; doxygen Doxyfile)
+
+clean:
+  rm -f -r .build
+  rm -f -r bin
+  rm -f -r doc
+  rm -f -r examples/*.json</code></pre>
+
+<p>Makefile can also take <code>CMAKE_PREFIX_PATH</code> as an argument and pass it on to CMake. <code>CMAKE_PREFIX_PATH</code> is used to supply arbitrary location of external libraries and include PATHS.</p>
+
+<p>Resources:</p>
+
+<p>(1) <a href='https://wiki.hpcc.msu.edu/display/~colbrydi@msu.edu/2010/08/19/Cmake+Makefile'>CMake Makefile &#8594;</a></p>
+</div>
+
+<div id="related">
+  <h2>Related Posts</h2>
+  <ul class="posts">
+    
+      <li><span>17 May 2012</span> &raquo; <a href="/2012/05/17/execution-engine-on-ubuntu">Execution Engine on Ubuntu</a></li>
+    
+      <li><span>11 May 2012</span> &raquo; <a href="/2012/05/11/porting-the-execution-engine-to-gnulinux">Porting the Execution Engine to GNU/Linux</a></li>
+    
+      <li><span>27 Apr 2012</span> &raquo; <a href="/2012/04/27/v23-its-flexible">v2.3: it's flexible</a></li>
+    
+  </ul>
+</div>
+
+
+
+
+    <div class="footer">
+      <div class="contact">
+        <p>
+          Vaibhav Bajpai<br />
+          <a href='mailto:contact@vaibhavbajpai.com'>contact@vaibhavbajpai.com</a>
+        </p>
+      </div>
+      <div class="contact">
+        <p>
+          <a href="http://github.com/vbajpai/">github.com/vbajpai</a><br />
+          <a href="http://facebook.com/vaibhavbajpai/">facebook.com/vaibhavbajpai</a><br />
+        </p>
+      </div>
+      <div class="rss">
+        <a href="http://feeds.feedburner.com/feedname">
+          <img src="/assets/themes/tom/images/rss.png" alt="Subscribe to RSS Feed" />
+        </a>
+      </div>
+    </div>
+  </div>
+  <a href="http://github.com/vbajpai"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+
+  
+</body>
+</html>
+
