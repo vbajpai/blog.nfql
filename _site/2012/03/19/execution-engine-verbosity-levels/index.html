@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Execution Engine Verbosity Levels</title>
+   <meta name="author" content="Vaibhav Bajpai" />
+   <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/assets/themes/tom/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/assets/themes/tom/css/screen.css" type="text/css" media="screen, projection" />
+
+   <!-- Typekit -->
+   <script type="text/javascript" src="http://use.typekit.com/jpd0pfm.js"></script>
+   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+<body>
+
+  <div class="site">
+    <div class="title">
+      <a href="/">NFQL</a>
+    </div>
+
+    
+<div id="post">
+  <h1>Execution Engine Verbosity Levels</h1>
+  <p class="meta">
+    19 March 2012 
+    
+  </p>
+  <p>Without verbosity or debugging levels the echo is minimalistic with only the end-result.<br />Offcourse, since the ungrouper is yet to be implemented, the run results in no echo.</p>
+
+<pre><code>[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json</code></pre>
+
+<p>Verbosity Levels:</p>
+
+<p>The engine is interactive to help you choose the right switches with required options.</p>
+
+<pre><code>[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json --verbose
+flowy-engine: option `--verbose&#39; requires an argument
+
+[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json --verbose
+ERROR: valid verbosity levels: (1-3)</code></pre>
+
+<p><code>--verbose=1</code>: shows the results of each stage of the pipeline</p>
+
+<pre><code>[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json --verbose=1
+No. of Filtered Records: 166
+...
+No. of Groups: 32 (Aggregations)
+...
+No. of Filtered Groups: 5 (Aggregations)
+...
+No. of Merged Groups: 3 (Tuples)
+...</code></pre>
+
+<p><code>--verbose=2</code>: additionally also shows the intermediate results of each stage of the pipeline</p>
+
+<pre><code>[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json --verbose=1
+No. of Filtered Records: 166
+...
+No. of Sorted Records: 166
+...
+No. of Unique Records: 32
+...
+No. of Groups: 32 (Verbose Output)
+...
+
+... 0     216.137.61.203  80    0     192.168.0.135 ... 
+... 0     216.137.61.203  80    0     192.168.0.135 ... 
+
+... 0     8.12.214.126    80    0     192.168.0.135 ...
+... 0     8.12.214.126    80    0     192.168.0.135 ...
+
+No. of Groups: 32 (Aggregations)
+...
+
+... 0     216.137.61.203  80    0     192.168.0.135 ... 
+... 0     8.12.214.126    80    0     192.168.0.135 ...
+
+No. of Filtered Groups: 5 (Aggregations)
+...
+No. of (to be) Matched Groups: 15 
+...
+
+... 0     192.168.0.135   0     0     204.160.123.126 80    ...
+... 0     87.238.86.121   80    0     192.168.0.135   0     ...
+
+... 0     192.168.0.135   0     0     216.46.94.66    80    ... 
+... 0     216.46.94.66    80    0     192.168.0.135   0     ... 	
+
+No. of Merged Groups: 3 (Tuples)
+...
+
+... 0     192.168.0.135   0     0     216.46.94.66    80    ... 
+... 0     216.46.94.66    80    0     192.168.0.135   0     ... 	</code></pre>
+
+<p><code>--verbose=3</code>: additionally also prints the original flow-record trace.</p>
+
+<pre><code>#
+# mode:                 normal
+# capture hostname:     ihp.jacobs.jacobs-university.de
+# capture start:        Fri, 02 Mar 2012 00:00:01 +0100
+# capture end:          Fri, 02 Mar 2012 00:05:00 +0100
+# capture period:       299 seconds
+# compress:             on
+# byte order:           little
+# stream version:       3
+# export version:       5
+# lost flows:           0
+# corrupt packets:      0
+# sequencer resets:     0
+# capture flows:        430
+#
+
+... Sif SrcIPaddress    SrcP  DIf   DstIPaddress    DstP  ... 
+...  0  10.50.244.59    138   0     10.50.255.255   138   ... 
+
+
+No. of Filtered Records: 166
+...
+No. of Sorted Records: 166
+...
+No. of Unique Records: 32
+...
+No. of Groups: 32 (Verbose Output)
+...
+No. of Groups: 32 (Aggregations)
+...
+No. of Filtered Groups: 5 (Aggregations)
+...
+No. of (to be) Matched Groups: 15 
+...
+No. of Merged Groups: 3 (Tuples)
+...</code></pre>
+</div>
+
+<div id="related">
+  <h2>Related Posts</h2>
+  <ul class="posts">
+    
+      <li><span>19 Mar 2012</span> &raquo; <a href="/2012/03/19/refactoring-the-execution-engine">Refactoring the Execution Engine</a></li>
+    
+      <li><span>19 Mar 2012</span> &raquo; <a href="/2012/03/19/merger-implementation">Merger Implementation</a></li>
+    
+      <li><span>19 Mar 2012</span> &raquo; <a href="/2012/03/19/group-filter-implementation">Group Filter Implementation</a></li>
+    
+  </ul>
+</div>
+
+
+
+
+    <div class="footer">
+      <div class="contact">
+        <p>
+          Vaibhav Bajpai<br />
+          <a href='mailto:contact@vaibhavbajpai.com'>contact@vaibhavbajpai.com</a>
+        </p>
+      </div>
+      <div class="contact">
+        <p>
+          <a href="http://github.com/vbajpai/">github.com/vbajpai</a><br />
+          <a href="http://facebook.com/vaibhavbajpai/">facebook.com/vaibhavbajpai</a><br />
+        </p>
+      </div>
+      <div class="rss">
+        <a href="http://feeds.feedburner.com/feedname">
+          <img src="/assets/themes/tom/images/rss.png" alt="Subscribe to RSS Feed" />
+        </a>
+      </div>
+    </div>
+  </div>
+  <a href="http://github.com/vbajpai"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+
+  
+</body>
+</html>
+

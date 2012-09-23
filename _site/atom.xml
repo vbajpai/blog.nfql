@@ -4,13 +4,181 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T11:16:57+02:00</updated>
+ <updated>2012-09-23T11:32:45+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Refactoring the Execution Engine</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/19/refactoring-the-execution-engine"/>
+   <updated>2012-03-19T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/19/refactoring-the-execution-engine</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;moved &lt;code&gt;branch_start(…)&lt;/code&gt; function (previously in &lt;code&gt;main(…)&lt;/code&gt;) to &lt;code&gt;branch.{h,c}&lt;/code&gt; (1)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;moved filter stage code to newly created &lt;code&gt;filter.{h,c}&lt;/code&gt; (2)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;renamed &lt;code&gt;grouper_fptr.{h,c}&lt;/code&gt; → &lt;code&gt;grouper.{h,c}&lt;/code&gt; (3)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;moved groupfilter stage code to newly created &lt;code&gt;groupfilter.{h,c}&lt;/code&gt; (4)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;renamed &lt;code&gt;merger_fptr.{h,c}&lt;/code&gt; → &lt;code&gt;merger.{h,c}&lt;/code&gt; (5)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;moved &lt;code&gt;iterate.{h,c}&lt;/code&gt; code (used by merger) to &lt;code&gt;utils.{h,c}&lt;/code&gt; (6)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;removed number of undefined function prototypes from &lt;code&gt;utils.h&lt;/code&gt; (6)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct bsearch_handle *
+tree_create_uintX_t(
+                    char **records, 
+                    size_t num_records, 
+                    unsigned short field_offset
+                   );
+char **
+tree_find_uintX_t( 
+                  struct bsearch_handle *handle,
+                  char *record, 
+                  unsigned short field_offset
+                 );
+void 
+tree_destroy(struct bsearch_handle *handle);&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where &lt;code&gt;X = {8, 16, 32, 64}&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;reorganized the whole engine&amp;#8217;s &lt;code&gt;src&lt;/code&gt; directory structure:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;├── auto-generated/
+│   ├── auto_assign.c
+│   ├── auto_assign.h
+│   ├── auto_comps.c
+│   ├── auto_comps.h
+│   └── fun_gen.py*
+├── bin/
+│   ├── filter-poop.py*
+│   ├── flowy-engine*
+│   ├── query.json
+│   ├── traces-long.ft*
+│   └── traces.ft*
+├── helpers/
+│   ├── error_handlers.c
+│   ├── error_handlers.h
+│   ├── utils.c
+│   └── utils.h
+├── pipeline/
+│   ├── branch/
+│   │   ├── branch.c
+│   │   ├── branch.h
+│   │   ├── filter.c
+│   │   ├── filter.h
+│   │   ├── grouper.c
+│   │   ├── grouper.h
+│   │   ├── groupfilter.c
+│   │   └── groupfilter.h
+│   ├── merger.c
+│   ├── merger.h
+│   └── pipeline.h
+├── Doxyfile
+├── Makefile
+├── README.md
+├── base.c
+├── base.h
+├── flowy.c
+├── flowy.h
+├── ftreader.c
+└── ftreader.h&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/branch_8h.html'&gt;&lt;code&gt;branch&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/filter_8h.html'&gt;&lt;code&gt;filter&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8h.html'&gt;&lt;code&gt;grouper&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(4) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/groupfilter_8h.html'&gt;&lt;code&gt;groupfilter&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(5) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/merger_8h.html'&gt;&lt;code&gt;merger&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(6) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/utils_8h.html'&gt;&lt;code&gt;utils&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Merger Implementation</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/19/merger-implementation"/>
+   <updated>2012-03-19T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/19/merger-implementation</id>
+   <content type="html">&lt;p&gt;The engine can now merge the groups from different branches according to a merging criteria. For example, a simple query to merge groups looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;merger m {
+  module m1 {
+    branches A, B
+    A.srcip = B.dstip
+    A.dstip = B.srcip
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;such a merging rule reflects in the engine as (1):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct merger_rule mfilter[2] = {
+  {
+    &amp;amp;binfos[0], trace_data-&amp;gt;offsets.srcaddr, 
+    &amp;amp;binfos[1], trace_data-&amp;gt;offsets.dstaddr, 
+    RULE_EQ | RULE_S1_32 | RULE_S2_32, 0, NULL
+  },
+
+  {
+    &amp;amp;binfos[0], trace_data-&amp;gt;offsets.dstaddr, 
+    &amp;amp;binfos[1], trace_data-&amp;gt;offsets.srcaddr,
+    RULE_EQ | RULE_S1_32 | RULE_S2_32, 0, NULL
+  },
+};&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where the rule maps to a specific merger function using a &lt;code&gt;switch&lt;/code&gt; case (2):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/* for loop for the merger */
+for (int j = 0; j &amp;lt; fquery-&amp;gt;num_merger_rules; j++) {
+  switch (fquery-&amp;gt;mrules[j].op) {
+    ...
+    case RULE_EQ | RULE_S1_32 | RULE_S2_32:
+      fquery-&amp;gt;mrules[j].func = merger_eq_uint32_t_uint32_t;
+      break;
+    ...
+  }
+}    &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The merger functions are auto-generated using a python script &lt;code&gt;fun-gen.py&lt;/code&gt; (3).&lt;/p&gt;
+
+&lt;p&gt;This is how the result looks:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine]$ ./flowy-engine traces-long.ft query.json --verbose=1
+
+No. of Merged Groups: 2 (Tuples)
+
+... Sif   SrcIPaddress    SrcP  DIf   DstIPaddress    DstP  ... 
+
+... 0     192.168.0.135   0     0     216.46.94.66    80    ... 
+... 0     216.46.94.66    80    0     192.168.0.135   0     ... 
+
+... 0     192.168.0.135   0     0     209.84.12.126   80    ... 
+... 0     209.84.12.126   80    0     192.168.0.135   0     ... &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All the permutation of group tuples checked for a match can be seen by increasing the verbosity level.&lt;/p&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/auto__assign_8c.html'&gt;&lt;code&gt;auto_assign&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/namespacefun__gen.html'&gt;&lt;code&gt;fun_gen&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
  
  <entry>
    <title>Group Filter Implementation</title>
@@ -119,6 +287,118 @@ for (int j = 0; j &amp;lt; binfos[i].num_aggr; j++) {
 &lt;p&gt;Resources:&lt;/p&gt;
 
 &lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'&gt;&lt;code&gt;pipeline&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'&gt;&lt;code&gt;flowy&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(3) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/auto__assign_8c.html'&gt;&lt;code&gt;auto_assign&lt;/code&gt; references &amp;#8594;&lt;/a&gt;&lt;br /&gt;(4) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/namespacefun__gen.html'&gt;&lt;code&gt;fun_gen&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Execution Engine Verbosity Levels</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/03/19/execution-engine-verbosity-levels"/>
+   <updated>2012-03-19T00:00:00+01:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/03/19/execution-engine-verbosity-levels</id>
+   <content type="html">&lt;p&gt;Without verbosity or debugging levels the echo is minimalistic with only the end-result.&lt;br /&gt;Offcourse, since the ungrouper is yet to be implemented, the run results in no echo.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Verbosity Levels:&lt;/p&gt;
+
+&lt;p&gt;The engine is interactive to help you choose the right switches with required options.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json --verbose
+flowy-engine: option `--verbose&amp;#39; requires an argument
+
+[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json --verbose
+ERROR: valid verbosity levels: (1-3)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;--verbose=1&lt;/code&gt;: shows the results of each stage of the pipeline&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json --verbose=1
+No. of Filtered Records: 166
+...
+No. of Groups: 32 (Aggregations)
+...
+No. of Filtered Groups: 5 (Aggregations)
+...
+No. of Merged Groups: 3 (Tuples)
+...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;--verbose=2&lt;/code&gt;: additionally also shows the intermediate results of each stage of the pipeline&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine]$ bin/flowy-engine bin/traces-long.ft bin/query.json --verbose=1
+No. of Filtered Records: 166
+...
+No. of Sorted Records: 166
+...
+No. of Unique Records: 32
+...
+No. of Groups: 32 (Verbose Output)
+...
+
+... 0     216.137.61.203  80    0     192.168.0.135 ... 
+... 0     216.137.61.203  80    0     192.168.0.135 ... 
+
+... 0     8.12.214.126    80    0     192.168.0.135 ...
+... 0     8.12.214.126    80    0     192.168.0.135 ...
+
+No. of Groups: 32 (Aggregations)
+...
+
+... 0     216.137.61.203  80    0     192.168.0.135 ... 
+... 0     8.12.214.126    80    0     192.168.0.135 ...
+
+No. of Filtered Groups: 5 (Aggregations)
+...
+No. of (to be) Matched Groups: 15 
+...
+
+... 0     192.168.0.135   0     0     204.160.123.126 80    ...
+... 0     87.238.86.121   80    0     192.168.0.135   0     ...
+
+... 0     192.168.0.135   0     0     216.46.94.66    80    ... 
+... 0     216.46.94.66    80    0     192.168.0.135   0     ... 	
+
+No. of Merged Groups: 3 (Tuples)
+...
+
+... 0     192.168.0.135   0     0     216.46.94.66    80    ... 
+... 0     216.46.94.66    80    0     192.168.0.135   0     ... 	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;--verbose=3&lt;/code&gt;: additionally also prints the original flow-record trace.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;#
+# mode:                 normal
+# capture hostname:     ihp.jacobs.jacobs-university.de
+# capture start:        Fri, 02 Mar 2012 00:00:01 +0100
+# capture end:          Fri, 02 Mar 2012 00:05:00 +0100
+# capture period:       299 seconds
+# compress:             on
+# byte order:           little
+# stream version:       3
+# export version:       5
+# lost flows:           0
+# corrupt packets:      0
+# sequencer resets:     0
+# capture flows:        430
+#
+
+... Sif SrcIPaddress    SrcP  DIf   DstIPaddress    DstP  ... 
+...  0  10.50.244.59    138   0     10.50.255.255   138   ... 
+
+
+No. of Filtered Records: 166
+...
+No. of Sorted Records: 166
+...
+No. of Unique Records: 32
+...
+No. of Groups: 32 (Verbose Output)
+...
+No. of Groups: 32 (Aggregations)
+...
+No. of Filtered Groups: 5 (Aggregations)
+...
+No. of (to be) Matched Groups: 15 
+...
+No. of Merged Groups: 3 (Tuples)
+...&lt;/code&gt;&lt;/pre&gt;</content>
  </entry>
  
  <entry>
