@@ -4,13 +4,227 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T19:24:59+02:00</updated>
+ <updated>2012-09-23T19:51:46+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>v2.3: it's flexible</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/27/v23-its-flexible"/>
+   <updated>2012-04-27T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/27/v23-its-flexible</id>
+   <content type="html">&lt;p&gt;Summary: (since after &lt;code&gt;v0.2&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; git show v0.3
+
+tag v0.3
+Tagger: Vaibhav Bajpai &amp;lt;contact@vaibhavbajpai.com&amp;gt;
+Date:   Wed May 16 18:25:22 2012 +0200
+Commit 1c323fa66b9aaaad56ad7c4127b8d187eaf4ec0c
+
+* complete query is read at RUNTIME using JSON-C
+* JSON queries are generated using python scripts
+* glibc backtrace(...) to print the back trace on errExit(...)
+* gracefully exiting when trace cannot be read
+* gracefully exiting when JSON query cannot be parsed
+* branch thread returns EXIT_FAILURE if either stage returns NULL
+* branch thread returns EXIT_SUCCESS on normal exit
+* each stage proceeds only when previous returned results
+* flow-cat ... | flowy-engine $QUERY -	&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Runtime Query Internals</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/25/runtime-query-internals"/>
+   <updated>2012-04-25T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/25/runtime-query-internals</id>
+   <content type="html">&lt;p&gt;When reading the &lt;code&gt;JSON&lt;/code&gt; query at RUNTIME, the field offsets of the NetFlow v5 record &lt;code&gt;struct&lt;/code&gt; are read in as a &lt;code&gt;char&lt;/code&gt; pointer. A utility function &lt;code&gt;get_offset(...)&lt;/code&gt; (2) was thus introduced that maps the read offset names to struct offsets.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;size_t
+get_offset (
+            const char * const name, 
+            const struct fts3rec_offsets* const offsets
+           ) {
+  
+  #define CASEOFF(memb)                       \
+  if (strcmp(name, #memb) == 0)               \
+    return offsets-&amp;gt;memb
+  
+  CASEOFF(unix_secs);
+  CASEOFF(unix_nsecs);
+  ...	
+		  
+  return -1;
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Similary the type of each offset and the operation type are also read in as &lt;code&gt;char&lt;/code&gt; pointers. This information is saved and thus used in the engine using an &lt;code&gt;enum&lt;/code&gt; defined in &lt;code&gt;pipeline.h&lt;/code&gt; (1). Therefore, another utility function &lt;code&gt;get_enum(...)&lt;/code&gt; (2) was defined to map this information to the unique enum members.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;uint64_t
+get_enum(const char * const name) {
+  
+  #define CASEENUM(memb)                      \
+  if (strcmp(name, #memb) == 0)               \
+    return memb
+  
+  CASEENUM(RULE_S1_8);
+  CASEENUM(RULE_S1_16);
+  ...
+  
+  CASEENUM(RULE_S2_8);
+  CASEENUM(RULE_S2_16);
+  ...
+
+  CASEENUM(RULE_ABS);
+  CASEENUM(RULE_REL);
+  CASEENUM(RULE_NO);
+  ...	  
+
+  CASEENUM(RULE_EQ);
+  CASEENUM(RULE_NE); 
+  ...	  
+
+  CASEENUM(RULE_STATIC);
+  CASEENUM(RULE_COUNT);
+  ...	  
+
+  CASEENUM(RULE_ALLEN_BF);
+  CASEENUM(RULE_ALLEN_AF);
+  ...	  
+  
+  return -1;
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'&gt;&lt;code&gt;pipeline&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/utils_8c.html'&gt;&lt;code&gt;utils&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Reading Queries at Runtime using json c</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/25/reading-queries-at-runtime-using-json-c"/>
+   <updated>2012-04-25T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/25/reading-queries-at-runtime-using-json-c</id>
+   <content type="html">&lt;p&gt;The complete query is now read in at runtime. The query is supplied as a &lt;code&gt;JSON&lt;/code&gt; file. The branchsets and each ruleset of the pipeline is a &lt;code&gt;JSON&lt;/code&gt; array. Each array is preceded by the number of items in that array. A sample &lt;code&gt;JSON&lt;/code&gt; query is shown below:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;branchset&amp;quot;: [
+    &amp;quot;num_branches&amp;quot;: 2
+    {
+      &amp;quot;filter&amp;quot;: {
+        &amp;quot;num_rules&amp;quot;: 2,
+        &amp;quot;ruleset&amp;quot;: [...]
+      },
+
+      &amp;quot;grouper&amp;quot;: {
+        &amp;quot;num_rules&amp;quot;: 2,
+        &amp;quot;ruleset&amp;quot;: [...]
+      }
+
+      &amp;quot;aggregation&amp;quot;: {
+        &amp;quot;num_rules&amp;quot;: 4,
+        &amp;quot;ruleset&amp;quot;: [...]
+      },
+      
+      &amp;quot;groupfilter&amp;quot;: {
+        &amp;quot;num_rules&amp;quot;: 1,
+        &amp;quot;ruleset&amp;quot;: [...]
+      },
+    },
+    { 
+      ...
+    }
+  ],
+  &amp;quot;merger&amp;quot;: {
+  &amp;quot;num_rules&amp;quot;: 2,
+    &amp;quot;ruleset&amp;quot;: [...]
+  },
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;json-c&lt;/code&gt; (1) is used to parse the query read by calling &lt;code&gt;parse_json_query(...)&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct json* json_query = parse_json_query(param_data-&amp;gt;query_mmap);&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The structure thus filled looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct json {
+  size_t                          num_branches;
+  size_t                          num_mrules;
+  
+  struct json_branch_rules**      branchset;
+  struct json_merger_rule**       mruleset;
+};&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where each branch rule looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct json_branch_rules {
+  size_t                          num_frules;
+  size_t                          num_grules;
+  size_t                          num_arules;
+  size_t                          num_gfrules;
+  
+  struct json_filter_rule**       fruleset;
+  struct json_grouper_rule**      gruleset;
+  struct json_aggr_rule**         aruleset;  
+  struct json_gfilter_rule**      gfruleset;    
+};&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;json_query&lt;/code&gt; is then used to prepare the &lt;code&gt;flowquery&lt;/code&gt;struct used by the stages (2).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct flowquery* fquery = prepare_flowquery(param_data-&amp;gt;trace, json_query);&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Practically, the &lt;code&gt;json_query&lt;/code&gt; is just an intermediate and shouldn&amp;#8217;t be needed. Essentially &lt;code&gt;parse_json_query(...)&lt;/code&gt; should directly fill in and create the &lt;code&gt;flowquery&lt;/code&gt; struct. I see it as a future refactor item.&lt;/p&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://oss.metaparadigm.com/json-c/'&gt;&lt;code&gt;json-c&lt;/code&gt; Library &amp;#8594;&lt;/a&gt;&lt;br /&gt;(2) &lt;a href='http://mthesis.vaibhavbajpai.com/post/20901257812/complete-engine-refactor'&gt;&lt;code&gt;flowquery&lt;/code&gt; structs and its descendents &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Generating JSON queries using Python</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/25/generating-json-queries-using-python"/>
+   <updated>2012-04-25T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/25/generating-json-queries-using-python</id>
+   <content type="html">&lt;p&gt;The &lt;code&gt;JSON&lt;/code&gt; query is verbose and quite cumbersome to manually edit. The Python Parser will eventually emit this intermediate format, so the next logical step is to generate the query from Python. A sample Python script looks like -&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class FilterRule: ...
+class GrouperRule: ...
+class AggregationRule: ...
+class GroupFilterRule: ...
+class MergerRule: ...
+
+bset = []
+bset.append (
+              {
+               &amp;#39;filter&amp;#39;: {&amp;#39;num_rules&amp;#39;: len(fruleset), &amp;#39;ruleset&amp;#39;: fruleset},
+               &amp;#39;grouper&amp;#39;: {&amp;#39;num_rules&amp;#39;: len(gruleset), &amp;#39;ruleset&amp;#39;: gruleset},
+               &amp;#39;aggregation&amp;#39;: {&amp;#39;num_rules&amp;#39;: len(aruleset), &amp;#39;ruleset&amp;#39;: aruleset},
+               &amp;#39;groupfilter&amp;#39;: {&amp;#39;num_rules&amp;#39;: len(gfruleset), &amp;#39;ruleset&amp;#39;: gfruleset},
+              }
+            );
+
+query = {
+          &amp;#39;num_branches&amp;#39;: len(branchset),
+          &amp;#39;branchset&amp;#39;: branchset,
+          &amp;#39;merger&amp;#39;: merger
+        }
+
+fjson = json.dumps(query, indent=2)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where each &lt;code&gt;ruleset&lt;/code&gt;is a list of Python objects. For instance, &lt;code&gt;fruleset&lt;/code&gt;is a list of &lt;code&gt;FilterRule&lt;/code&gt;objects. At this point, the Python Parser just needs to create each stage rule objects and this script will take care to emit the &lt;code&gt;JSON&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Some example scripts to generate &lt;code&gt;JSON&lt;/code&gt; queries is given in &lt;code&gt;scripts/queries/&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;|-- scripts/
+|   |-- queries/
+|   |   |-- build-ftp-tcp-session.py*
+|   |   |-- build-http-octets.py*
+|   |   |-- build-http-tcp-session.py*
+|   |   `-- build-https-tcp-session.py*&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
  
  <entry>
    <title>Flexible Stages</title>

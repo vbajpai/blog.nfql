@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Flexible Grouper</title>
+   <title>Generating JSON queries using Python</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,45 +26,47 @@
 
     
 <div id="post">
-  <h1>Flexible Grouper</h1>
+  <h1>Generating JSON queries using Python</h1>
   <p class="meta">
-    18 April 2012 
+    25 April 2012 
     
   </p>
-  <p>The <code>grouper(...)</code> (1) call was plagued with hardcoded <code>uint32_t</code> type assumption on the field offset being used to make grouper rule comparisons. The function now internally calls <code>get_gtype(...)</code> to fall through a switch case to determine the type of the field offset at RUNTIME. Here is a snippet:</p>
+  <p>The <code>JSON</code> query is verbose and quite cumbersome to manually edit. The Python Parser will eventually emit this intermediate format, so the next logical step is to generate the query from Python. A sample Python script looks like -</p>
 
-<pre><code>struct grouper_type* get_gtype(uint64_t op) { 
-  ...
-  switch (op) {
-  
-    case RULE_S2_8:
-      gtype-&gt;qsort_comp = comp_uint8_t;
-      gtype-&gt;bsearch = bsearch_uint8_t;
-      gtype-&gt;alloc_uniqresult = alloc_uniqresult_uint8_t;
-      gtype-&gt;get_uniq_record = get_uniq_record_uint8_t;      
-      gtype-&gt;dealloc_uniqresult = dealloc_uniqresult_uint8_t;
+<pre><code>class FilterRule: ...
+class GrouperRule: ...
+class AggregationRule: ...
+class GroupFilterRule: ...
+class MergerRule: ...
 
-      break;
-    case RULE_S2_16:
-      ...
-      break;
-      
-    case RULE_S2_32:
-      ...
-      break;
-      
-    case RULE_S2_64:
-      ...
-      break;
-  }
-  return gtype;
-}</code></pre>
+bset = []
+bset.append (
+              {
+               &#39;filter&#39;: {&#39;num_rules&#39;: len(fruleset), &#39;ruleset&#39;: fruleset},
+               &#39;grouper&#39;: {&#39;num_rules&#39;: len(gruleset), &#39;ruleset&#39;: gruleset},
+               &#39;aggregation&#39;: {&#39;num_rules&#39;: len(aruleset), &#39;ruleset&#39;: aruleset},
+               &#39;groupfilter&#39;: {&#39;num_rules&#39;: len(gfruleset), &#39;ruleset&#39;: gfruleset},
+              }
+            );
 
-<p>At this point I do not think I have any assumptions on any field offset for any pipeline stage. As such experimentation on different style of queries should now work and is the next item on the list to investigate.</p>
+query = {
+          &#39;num_branches&#39;: len(branchset),
+          &#39;branchset&#39;: branchset,
+          &#39;merger&#39;: merger
+        }
 
-<p>Resources:</p>
+fjson = json.dumps(query, indent=2)</code></pre>
 
-<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8h_source.html'><code>grouper</code> reference &#8594;</a></p>
+<p>where each <code>ruleset</code>is a list of Python objects. For instance, <code>fruleset</code>is a list of <code>FilterRule</code>objects. At this point, the Python Parser just needs to create each stage rule objects and this script will take care to emit the <code>JSON</code>.</p>
+
+<p>Some example scripts to generate <code>JSON</code> queries is given in <code>scripts/queries/</code></p>
+
+<pre><code>|-- scripts/
+|   |-- queries/
+|   |   |-- build-ftp-tcp-session.py*
+|   |   |-- build-http-octets.py*
+|   |   |-- build-http-tcp-session.py*
+|   |   `-- build-https-tcp-session.py*</code></pre>
 </div>
 
 <div id="related">

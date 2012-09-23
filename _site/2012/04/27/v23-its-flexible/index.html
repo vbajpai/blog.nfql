@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Flexible Grouper</title>
+   <title>v2.3: it's flexible</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,56 +26,40 @@
 
     
 <div id="post">
-  <h1>Flexible Grouper</h1>
+  <h1>v2.3: it's flexible</h1>
   <p class="meta">
-    18 April 2012 
+    27 April 2012 
     
   </p>
-  <p>The <code>grouper(...)</code> (1) call was plagued with hardcoded <code>uint32_t</code> type assumption on the field offset being used to make grouper rule comparisons. The function now internally calls <code>get_gtype(...)</code> to fall through a switch case to determine the type of the field offset at RUNTIME. Here is a snippet:</p>
+  <p>Summary: (since after <code>v0.2</code>)</p>
 
-<pre><code>struct grouper_type* get_gtype(uint64_t op) { 
-  ...
-  switch (op) {
-  
-    case RULE_S2_8:
-      gtype-&gt;qsort_comp = comp_uint8_t;
-      gtype-&gt;bsearch = bsearch_uint8_t;
-      gtype-&gt;alloc_uniqresult = alloc_uniqresult_uint8_t;
-      gtype-&gt;get_uniq_record = get_uniq_record_uint8_t;      
-      gtype-&gt;dealloc_uniqresult = dealloc_uniqresult_uint8_t;
+<pre><code>&gt;&gt; git show v0.3
 
-      break;
-    case RULE_S2_16:
-      ...
-      break;
-      
-    case RULE_S2_32:
-      ...
-      break;
-      
-    case RULE_S2_64:
-      ...
-      break;
-  }
-  return gtype;
-}</code></pre>
+tag v0.3
+Tagger: Vaibhav Bajpai &lt;contact@vaibhavbajpai.com&gt;
+Date:   Wed May 16 18:25:22 2012 +0200
+Commit 1c323fa66b9aaaad56ad7c4127b8d187eaf4ec0c
 
-<p>At this point I do not think I have any assumptions on any field offset for any pipeline stage. As such experimentation on different style of queries should now work and is the next item on the list to investigate.</p>
-
-<p>Resources:</p>
-
-<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8h_source.html'><code>grouper</code> reference &#8594;</a></p>
+* complete query is read at RUNTIME using JSON-C
+* JSON queries are generated using python scripts
+* glibc backtrace(...) to print the back trace on errExit(...)
+* gracefully exiting when trace cannot be read
+* gracefully exiting when JSON query cannot be parsed
+* branch thread returns EXIT_FAILURE if either stage returns NULL
+* branch thread returns EXIT_SUCCESS on normal exit
+* each stage proceeds only when previous returned results
+* flow-cat ... | flowy-engine $QUERY -	</code></pre>
 </div>
 
 <div id="related">
   <h2>Related Posts</h2>
   <ul class="posts">
     
-      <li><span>27 Apr 2012</span> &raquo; <a href="/2012/04/27/v23-its-flexible">v2.3: it's flexible</a></li>
-    
       <li><span>25 Apr 2012</span> &raquo; <a href="/2012/04/25/runtime-query-internals">Runtime Query Internals</a></li>
     
       <li><span>25 Apr 2012</span> &raquo; <a href="/2012/04/25/reading-queries-at-runtime-using-json-c">Reading Queries at Runtime using json c</a></li>
+    
+      <li><span>25 Apr 2012</span> &raquo; <a href="/2012/04/25/generating-json-queries-using-python">Generating JSON queries using Python</a></li>
     
   </ul>
 </div>

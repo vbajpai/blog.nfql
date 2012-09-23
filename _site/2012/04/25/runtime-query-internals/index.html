@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Flexible Grouper</title>
+   <title>Runtime Query Internals</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,45 +26,70 @@
 
     
 <div id="post">
-  <h1>Flexible Grouper</h1>
+  <h1>Runtime Query Internals</h1>
   <p class="meta">
-    18 April 2012 
+    25 April 2012 
     
   </p>
-  <p>The <code>grouper(...)</code> (1) call was plagued with hardcoded <code>uint32_t</code> type assumption on the field offset being used to make grouper rule comparisons. The function now internally calls <code>get_gtype(...)</code> to fall through a switch case to determine the type of the field offset at RUNTIME. Here is a snippet:</p>
+  <p>When reading the <code>JSON</code> query at RUNTIME, the field offsets of the NetFlow v5 record <code>struct</code> are read in as a <code>char</code> pointer. A utility function <code>get_offset(...)</code> (2) was thus introduced that maps the read offset names to struct offsets.</p>
 
-<pre><code>struct grouper_type* get_gtype(uint64_t op) { 
-  ...
-  switch (op) {
+<pre><code>size_t
+get_offset (
+            const char * const name, 
+            const struct fts3rec_offsets* const offsets
+           ) {
   
-    case RULE_S2_8:
-      gtype-&gt;qsort_comp = comp_uint8_t;
-      gtype-&gt;bsearch = bsearch_uint8_t;
-      gtype-&gt;alloc_uniqresult = alloc_uniqresult_uint8_t;
-      gtype-&gt;get_uniq_record = get_uniq_record_uint8_t;      
-      gtype-&gt;dealloc_uniqresult = dealloc_uniqresult_uint8_t;
-
-      break;
-    case RULE_S2_16:
-      ...
-      break;
-      
-    case RULE_S2_32:
-      ...
-      break;
-      
-    case RULE_S2_64:
-      ...
-      break;
-  }
-  return gtype;
+  #define CASEOFF(memb)                       \
+  if (strcmp(name, #memb) == 0)               \
+    return offsets-&gt;memb
+  
+  CASEOFF(unix_secs);
+  CASEOFF(unix_nsecs);
+  ...	
+		  
+  return -1;
 }</code></pre>
 
-<p>At this point I do not think I have any assumptions on any field offset for any pipeline stage. As such experimentation on different style of queries should now work and is the next item on the list to investigate.</p>
+<p>Similary the type of each offset and the operation type are also read in as <code>char</code> pointers. This information is saved and thus used in the engine using an <code>enum</code> defined in <code>pipeline.h</code> (1). Therefore, another utility function <code>get_enum(...)</code> (2) was defined to map this information to the unique enum members.</p>
+
+<pre><code>uint64_t
+get_enum(const char * const name) {
+  
+  #define CASEENUM(memb)                      \
+  if (strcmp(name, #memb) == 0)               \
+    return memb
+  
+  CASEENUM(RULE_S1_8);
+  CASEENUM(RULE_S1_16);
+  ...
+  
+  CASEENUM(RULE_S2_8);
+  CASEENUM(RULE_S2_16);
+  ...
+
+  CASEENUM(RULE_ABS);
+  CASEENUM(RULE_REL);
+  CASEENUM(RULE_NO);
+  ...	  
+
+  CASEENUM(RULE_EQ);
+  CASEENUM(RULE_NE); 
+  ...	  
+
+  CASEENUM(RULE_STATIC);
+  CASEENUM(RULE_COUNT);
+  ...	  
+
+  CASEENUM(RULE_ALLEN_BF);
+  CASEENUM(RULE_ALLEN_AF);
+  ...	  
+  
+  return -1;
+}</code></pre>
 
 <p>Resources:</p>
 
-<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8h_source.html'><code>grouper</code> reference &#8594;</a></p>
+<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'><code>pipeline</code> reference &#8594;</a><br />(2) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/utils_8c.html'><code>utils</code> reference &#8594;</a></p>
 </div>
 
 <div id="related">
@@ -73,9 +98,9 @@
     
       <li><span>27 Apr 2012</span> &raquo; <a href="/2012/04/27/v23-its-flexible">v2.3: it's flexible</a></li>
     
-      <li><span>25 Apr 2012</span> &raquo; <a href="/2012/04/25/runtime-query-internals">Runtime Query Internals</a></li>
-    
       <li><span>25 Apr 2012</span> &raquo; <a href="/2012/04/25/reading-queries-at-runtime-using-json-c">Reading Queries at Runtime using json c</a></li>
+    
+      <li><span>25 Apr 2012</span> &raquo; <a href="/2012/04/25/generating-json-queries-using-python">Generating JSON queries using Python</a></li>
     
   </ul>
 </div>
