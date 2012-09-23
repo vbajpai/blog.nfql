@@ -4,13 +4,201 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T21:29:05+02:00</updated>
+ <updated>2012-09-23T21:49:57+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>flow tools to SiLK</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/23/flow-tools-to-silk"/>
+   <updated>2012-06-23T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/23/flow-tools-to-silk</id>
+   <content type="html">&lt;h2 id='flowtools_to_silk'&gt;Flow-tools to SiLK&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;p&gt;Install &lt;code&gt;nfdump&lt;/code&gt; and &lt;code&gt;ft2nfdump&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; sudo apt-get install nfdump
+&amp;gt;&amp;gt; sudo apt-get install nfdump-flow-tools&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Convert flow-tools traces to nfdump&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; flow-cat $INPUT | ft2nfdump | nfdump -w $OUTPUT
+&amp;gt;&amp;gt; nfdump -r $OUTPUT&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Replay the nfdump traces&lt;br /&gt;(The trace is replayed to &lt;code&gt;127.0.0.1&lt;/code&gt; at port &lt;code&gt;9995&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; nfreplay -r $TRACE&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Configure a sensor to collect replayed data&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; cat sensors.conf
+
+probe S1 netflow-v5
+  listen-on-port 9995
+  protocol udp
+  accept-from-host 127.0.0.1
+end probe
+
+sensor S1
+  netflow-v5-probes S1
+  internal-ipblocks 10.0.0.0/8
+  external-ipblocks remainder
+end sensor&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Collect flow data and save in binary SiLK files&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwflowpack \
+   --site-config-file=/usr/local/share/silk/generic-silk.conf \
+   --sensor-configuration=sensors.conf \ 
+   --root-directory=/var/log/silk/ \
+   --log-destination=both
+    
+rwflowpack[14830]: Forked child 14831.  Parent exiting
+rwflowpack[14831]: Using packing logic from …
+rwflowpack[14831]: Creating stream cache                                        
+rwflowpack[14831]: Starting flow processor #1 for PDU Reader
+rwflowpack[14831]: Creating PDU Reader Source Pool
+rwflowpack[14831]: Creating PDU Reader for probe &amp;#39;S1&amp;#39; on 0.0.0.0:9995
+rwflowpack[14831]: Starting flush timer                                    
+rwflowpack[14831]: Started manager thread for PDU Reader&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Flatten the SiLK root directory&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; find /var/log/silk -type f -exec cp {} /var/log/silkflat/ \;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Combine all SiLK files into a single archive&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; ls | rwcat --xargs --output-path=/var/log/silk.gz&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Installing SiLK</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/20/installing-silk"/>
+   <updated>2012-06-20T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/20/installing-silk</id>
+   <content type="html">&lt;p&gt;&lt;a href='http://tools.netsa.cert.org/silk/'&gt;SiLK &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;SiLK is a suite of network traffic collection and analysis tools developed and maintained by the CERT Network Situational Awareness Team (CERT NetSA) at Carnegie Mellon University to facilitate security analysis of large networks. The SiLK tool suite supports the efficient collection, storage, and analysis of network flow data, enabling network security analysts to rapidly query large historical traffic data sets.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Since SiLK is the only tool that comes even remotely closer to the functionality offered by the NFQL, we used it as a reference to compare the performance of the execution engine.&lt;/p&gt;
+
+&lt;h2 id='download_and_install_silk'&gt;Download and Install SiLK&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;p&gt;Download &lt;a href='http://tools.netsa.cert.org/silk/'&gt;SiLK &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; wget http://tools.netsa.cert.org/releases/silk-2.4.7.tar.gz
+&amp;gt;&amp;gt; sha1sum silk-2.4.7.tar.gz | grep 2ff0cd1d00de70f667728830aa3e920292e99aec&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install SiLK&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; ./configure
+&amp;gt;&amp;gt; make
+&amp;gt;&amp;gt; sudo make install
+&amp;gt;&amp;gt; sudo ldconfig&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.&lt;/p&gt;
+
+&lt;h2 id='silk_analysis_tools'&gt;SiLK Analysis Tools:&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;p&gt;Absolute Filtering &lt;code&gt;(dst port 80 or (src port 80 and dst port 25))&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwfilter --dport=80 --pass=out1.rwf.gz in.rwf.gz
+&amp;gt;&amp;gt; rwfilter --sport=80 --dport=25 --pass=out2.rwf.gz in.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Concatenating Flow Records&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwcat --output=out.rwf.gz out1.rwf.gz out2.rwf.gz
+&amp;gt;&amp;gt; rwcat out1.rwf.gz out2.rwf.gz &amp;gt;&amp;gt; out.rwf.gz
+&amp;gt;&amp;gt; rwappend [--create] out.rwf.gz out1.rwf.gz out2.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Reading Flow Records&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwcut out.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Generating Statistical Summary&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwstats --overall-stats out.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Creating Time Series (10 minute interval)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwcount --bin-size=600 out.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Sorting Flow Records (on &lt;code&gt;srcIP&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwsort --fields=1 --output=out-sort.rwf.gz out.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Grouping Flow Records and Setting Thresholds&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwuniq --field=1 out.raw --bytes --packets=1000 --flows=200
+&amp;gt;&amp;gt; rwgroup --id-field=1,2,3,4 \
+   --delta-field=9 --delta-value=3600 in.rwf.gz &amp;gt; out.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Remove Duplicate Flow Records&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwdedupe --stime-delta=100 out1.rwf.gz out2.rwf.gz &amp;gt; out.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Splitting Flow Records&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwsplit out.rwf.gz --basename=splits --flow-limit=1000&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Show SiLK File Characteristics&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwfileinfo out.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Merging Flow Records&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;srcIP = dstIP
+dstIP = srcIP
+srcPort = dstPort
+dstPort = srcPort
+
+&amp;gt;&amp;gt; rwmatch --relate=1,2 --relate=2,1 --relate=3,4 --relate=4,3 \ 
+   query.rwf.gz response.rwf.gz stdout&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;.&lt;/p&gt;
+
+&lt;h2 id='generate_silk_flow_records'&gt;Generate SiLK Flow Records:&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;p&gt;Generate Flow Records from Text Files&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwtuc --fields=1-9 out.txt &amp;gt; out.rwf.gz&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Generate Flow Record for each Dumped Packet from &lt;code&gt;tcpdump&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwptoflow out.pcap &amp;gt; out.rwf.gz&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>More Resolved Issues</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/17/more-resolved-issues"/>
+   <updated>2012-06-17T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/17/more-resolved-issues</id>
+   <content type="html">&lt;p&gt;&lt;a href='https://github.com/vbajpai/mthesis-src/issues/68'&gt;Issue #68 &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;engine&lt;/code&gt; now does NOT segfault when &lt;code&gt;srcaddr = dstaddr&lt;/code&gt; is provided at the grouper stage. An example query script has been provided to confirm this that finds all the TCP sessions between 2 endpoints. A test case for this query on both the traces has also been provided.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/vbajpai/mthesis-src/issues/84'&gt;Issue #84 &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Simpler source organization by moving the headers from &lt;code&gt;include/&lt;/code&gt; to &lt;code&gt;src/&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/vbajpai/mthesis-src/issues/93'&gt;Issue #93 &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Previously 3/4 queries did not return any results on the example trace file. Therefore a new larger trace has been added at &lt;code&gt;examples/&lt;/code&gt;. All the queries give results on this trace. Additional &lt;code&gt;tcp-session&lt;/code&gt;, &lt;code&gt;dns&lt;/code&gt; and &lt;code&gt;mdns&lt;/code&gt; queries have also been added in &lt;code&gt;scripts/queries/&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/vbajpai/mthesis-src/issues/94'&gt;Issue #94 &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Removed all trailing whitespaces from sources and headers&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='https://github.com/vbajpai/mthesis-src/issues/95'&gt;Issue #95 &amp;#8594;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;There was apparantely a segmentation fault when no grouper rules were defined. This was due to an attempt to free sorted/unique recordset pointers which are not allocated when no grouper rules are defined.&lt;/p&gt;</content>
+ </entry>
  
  <entry>
    <title>Regression Test Suite for the Execution Engine</title>
