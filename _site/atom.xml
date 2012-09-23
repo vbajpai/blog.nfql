@@ -4,13 +4,142 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T20:34:15+02:00</updated>
+ <updated>2012-09-23T21:09:27+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Packaging the Parser</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/13/packaging-the-parser"/>
+   <updated>2012-06-13T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/13/packaging-the-parser</id>
+   <content type="html">&lt;p&gt;Parser Directory Organization:&lt;/p&gt;
+
+&lt;p&gt;Source code has been moved to &lt;code&gt;parser/src/&lt;/code&gt;, and documentation has been moved to &lt;code&gt;parser/docs/&lt;/code&gt;. Queries and Examples traces have been moved to &lt;code&gt;parser/examples/&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Parser Installation is now Painless:&lt;/p&gt;
+
+&lt;p&gt;Apparatenly there is a bug in &lt;code&gt;numexpr&lt;/code&gt; which imports externals dependencies in its egg files. As a result, installation from a requirements file fails (1). To circumvent the issue, I have created a custom Makefile that virtually creates an additional preprocessing pass to install &lt;code&gt;numexpr&lt;/code&gt;&amp;#8217;s dependencies before installing from &lt;code&gt;requirements.txt&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;make: numexpr
+  (pip install -r requirements.txt)
+
+numexpr: numpy
+  (pip install numexpr==2.0.1)
+
+numpy: cython
+  (pip install numpy==1.6.1)
+
+cython:
+  (pip install Cython==0.15.1)
+
+clean:
+  rm -f -r build/
+  rm -f -r src/*.pyc
+  rm -f -r flowy-run/
+  rm -f -r parsetab.py parser.out
+  rm -f -r examples/output.h5&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A detailed &lt;code&gt;README.md&lt;/code&gt; file has been included to provide build instructions with &lt;code&gt;virtualenvwrapper&lt;/code&gt; and usage.&lt;/p&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://stackoverflow.com/questions/11015692/pip-fails-to-install-packages-from-requirements-txt'&gt;&lt;span&gt;stackoverflow&lt;/span&gt;: pip fails to install packages from requirements.txt &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Refactored JSON Query Scripts</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/12/refactored-json-query-scripts"/>
+   <updated>2012-06-12T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/12/refactored-json-query-scripts</id>
+   <content type="html">&lt;p&gt;The classes defined for each pipeline stage are now refactored out into &lt;code&gt;scripts/queries/pipeline.py&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;def protocol(name):
+  return socket.getprotobyname(name)
+
+class FilterRule: ...
+class GrouperRule: ...
+class AggregationRule: ...
+class GroupFilterRule: ...
+class MergerRule: ...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Scripts that generate &lt;code&gt;JSON&lt;/code&gt; queries can now &lt;code&gt;import&lt;/code&gt; this module to reduce code redundancy.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import json
+from pipeline import FilterRule, GrouperRule, AggregationRule
+from pipeline import GroupFilterRule, MergerRule
+from pipeline import protocol
+
+if __name__ == &amp;#39;__main__&amp;#39;:
+
+  fruleset = []
+  fruleset.append(vars(FilterRule(...)))
+  ...
+  filter = {&amp;#39;ruleset&amp;#39;: fruleset}
+
+  gruleset = []
+  gruleset.append(vars(GrouperRule(...)))
+  ...
+  grouper = {&amp;#39;ruleset&amp;#39;: gruleset}
+
+  aruleset = []
+  aruleset.append(vars(AggregationRule(...)))
+  a = {&amp;#39;ruleset&amp;#39; : aruleset}
+
+  gfruleset = []
+  gfruleset.append(vars(GroupFilterRule(…)))
+  gfilter = {&amp;#39;ruleset&amp;#39; : gfruleset}
+
+  branchset = []
+  branchset.append (
+                     {
+                      &amp;#39;filter&amp;#39;: filter,
+                      &amp;#39;grouper&amp;#39;: grouper,
+                      &amp;#39;aggregation&amp;#39;: a,
+                      &amp;#39;gfilter&amp;#39;: gfilter,
+                     }
+                   )
+
+  mruleset = []
+  mruleset.append(vars(MergerRule(...)))
+  merger = {&amp;#39;ruleset&amp;#39; : mruleset}
+  query = {&amp;#39;branchset&amp;#39;: branchset, &amp;#39;merger&amp;#39;: merger}
+  ...	&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Evaluation of Ruleset Lengths at Runtime</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/11/evaluation-of-ruleset-lengths-at-runtime"/>
+   <updated>2012-06-11T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/11/evaluation-of-ruleset-lengths-at-runtime</id>
+   <content type="html">&lt;p&gt;Previously a &lt;code&gt;JSON&lt;/code&gt; query also described the number of rules contained in the &lt;code&gt;rulesets&lt;/code&gt; that followed. Since &lt;code&gt;JSON&lt;/code&gt; is based on Javascript Objects there is a possibility to let the engine calculate the length of the array at runtime.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;branchset&amp;quot;: [
+    &amp;quot;num_branches&amp;quot;: 2
+    {
+      &amp;quot;filter&amp;quot;: {
+        &amp;quot;num_rules&amp;quot;: 2,
+        &amp;quot;ruleset&amp;quot;: [...]
+      },
+    ...
+}]}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A similar &lt;code&gt;JSON&lt;/code&gt; query is condensed to now look like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;branchset&amp;quot;: [
+    {
+      &amp;quot;filter&amp;quot;: {
+        &amp;quot;ruleset&amp;quot;: [...]
+      },
+  ...
+}]}&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
  
  <entry>
    <title>Better Execution Engine Usage on Run</title>

@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Flexible Grouper</title>
+   <title>Evaluation of Ruleset Lengths at Runtime</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,45 +26,34 @@
 
     
 <div id="post">
-  <h1>Flexible Grouper</h1>
+  <h1>Evaluation of Ruleset Lengths at Runtime</h1>
   <p class="meta">
-    18 April 2012 
+    11 June 2012 
     
   </p>
-  <p>The <code>grouper(...)</code> (1) call was plagued with hardcoded <code>uint32_t</code> type assumption on the field offset being used to make grouper rule comparisons. The function now internally calls <code>get_gtype(...)</code> to fall through a switch case to determine the type of the field offset at RUNTIME. Here is a snippet:</p>
+  <p>Previously a <code>JSON</code> query also described the number of rules contained in the <code>rulesets</code> that followed. Since <code>JSON</code> is based on Javascript Objects there is a possibility to let the engine calculate the length of the array at runtime.</p>
 
-<pre><code>struct grouper_type* get_gtype(uint64_t op) { 
+<pre><code>{
+  &quot;branchset&quot;: [
+    &quot;num_branches&quot;: 2
+    {
+      &quot;filter&quot;: {
+        &quot;num_rules&quot;: 2,
+        &quot;ruleset&quot;: [...]
+      },
+    ...
+}]}</code></pre>
+
+<p>A similar <code>JSON</code> query is condensed to now look like:</p>
+
+<pre><code>{
+  &quot;branchset&quot;: [
+    {
+      &quot;filter&quot;: {
+        &quot;ruleset&quot;: [...]
+      },
   ...
-  switch (op) {
-  
-    case RULE_S2_8:
-      gtype-&gt;qsort_comp = comp_uint8_t;
-      gtype-&gt;bsearch = bsearch_uint8_t;
-      gtype-&gt;alloc_uniqresult = alloc_uniqresult_uint8_t;
-      gtype-&gt;get_uniq_record = get_uniq_record_uint8_t;      
-      gtype-&gt;dealloc_uniqresult = dealloc_uniqresult_uint8_t;
-
-      break;
-    case RULE_S2_16:
-      ...
-      break;
-      
-    case RULE_S2_32:
-      ...
-      break;
-      
-    case RULE_S2_64:
-      ...
-      break;
-  }
-  return gtype;
-}</code></pre>
-
-<p>At this point I do not think I have any assumptions on any field offset for any pipeline stage. As such experimentation on different style of queries should now work and is the next item on the list to investigate.</p>
-
-<p>Resources:</p>
-
-<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8h_source.html'><code>grouper</code> reference &#8594;</a></p>
+}]}</code></pre>
 </div>
 
 <div id="related">
@@ -75,7 +64,7 @@
     
       <li><span>12 Jun 2012</span> &raquo; <a href="/2012/06/12/refactored-json-query-scripts">Refactored JSON Query Scripts</a></li>
     
-      <li><span>11 Jun 2012</span> &raquo; <a href="/2012/06/11/evaluation-of-ruleset-lengths-at-runtime">Evaluation of Ruleset Lengths at Runtime</a></li>
+      <li><span>31 May 2012</span> &raquo; <a href="/2012/05/31/better-execution-engine-usage-on-run">Better Execution Engine Usage on Run</a></li>
     
   </ul>
 </div>
