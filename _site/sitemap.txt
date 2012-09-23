@@ -7,7 +7,10 @@ http://vbajpai.github.com/blog.nfql/pages.html
 http://vbajpai.github.com/blog.nfql/sitemap.txt
 http://vbajpai.github.com/blog.nfql/tags.html
 
+http://vbajpai.github.com/blog.nfql/2012/03/26/ungrouper-implementation
+http://vbajpai.github.com/blog.nfql/2012/03/26/flexible-group-filters-and-aggregations
 http://vbajpai.github.com/blog.nfql/2012/03/19/refactoring-the-execution-engine
+http://vbajpai.github.com/blog.nfql/2012/03/19/merger-internals
 http://vbajpai.github.com/blog.nfql/2012/03/19/merger-implementation
 http://vbajpai.github.com/blog.nfql/2012/03/19/group-filter-implementation
 http://vbajpai.github.com/blog.nfql/2012/03/19/flexible-group-aggregations

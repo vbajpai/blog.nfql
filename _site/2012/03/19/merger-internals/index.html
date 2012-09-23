@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Merger Internals</title>
+   <meta name="author" content="Vaibhav Bajpai" />
+   <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/assets/themes/tom/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/assets/themes/tom/css/screen.css" type="text/css" media="screen, projection" />
+
+   <!-- Typekit -->
+   <script type="text/javascript" src="http://use.typekit.com/jpd0pfm.js"></script>
+   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+<body>
+
+  <div class="site">
+    <div class="title">
+      <a href="/">NFQL</a>
+    </div>
+
+    
+<div id="post">
+  <h1>Merger Internals</h1>
+  <p class="meta">
+    19 March 2012 
+    
+  </p>
+  <p>The pseudocode for the merger looks like: (1)</p>
+
+<pre><code>get_module_output_stream(module m) {
+  (branch_1, branch_2, ..., branch_n) = get_input_branches(m);
+  for each g_1 in group_records(branch_1)
+    for each g_2 in group_records(branch_2)
+      ...
+        ...
+           for each g_n in group_records(branch_n)
+              if match(g_1, g_2, ..., g_n, rules(m))
+                 output.add(g_1, g_2,..., g_n);
+  return output;
+}</code></pre>
+
+<p>Implementing this pseudocode in <code>C</code> is not straightforward, since the level of nesting actually depends on the number of branches, and is therefore not known until RUNTIME when is passed through the query.</p>
+
+<p>As such we need to implement a utility that can provide all possible permutations of <code>N</code>-tuple group record IDs that we can use to make a match, where <code>N</code> is the number of branches.</p>
+
+<p>As such, we initialize an iterator passing it the number of branches, and information about each branch. Then, we iterate over until the iterator returns <code>FALSE</code>. (2) A sample code to print all possible groupID permutation tuples is shown below:</p>
+
+<pre><code>/* initialize the iterator */
+struct permut_iter *iter = iter_init(binfo_set, num_branches);
+
+/* iterate over all permutations */
+unsigned int index = 0;
+while(iter_next(iter)) {
+  index++
+  for (int j = 0; j &lt; num_branches; j++) {
+    /* first item */
+    if(j == 0)
+      printf(&quot;\n%d: (%zu &quot;, index, iter-&gt;filtered_group_tuple[j]);
+    /* last item */
+    else if(j == num_branches -1)
+      printf(&quot;%zu)&quot;, iter-&gt;filtered_group_tuple[j]);
+    else
+      printf(&quot;%zu &quot;, iter-&gt;filtered_group_tuple[j]);
+  }
+}
+
+/* free the iterator */
+iter_destroy(iter);</code></pre>
+
+<p>The output gives all possible permutations, which we later use to try to make a match. Here, the number of filtered groups passed to merger where: <code>(b1, b2, b3) = (3, 2, 2)</code></p>
+
+<pre><code>1: (1 1 1)
+2: (1 1 2)
+3: (1 2 1)
+4: (1 2 2)
+5: (2 1 1)
+6: (2 1 2)
+7: (2 2 1)
+8: (2 2 2)
+9: (3 1 1)
+10: (3 1 2)
+11: (3 2 1)
+12: (3 2 2)</code></pre>
+
+<p>Resources:</p>
+
+<p>(1) <a href='https://svn.eecs.jacobs-university.de/svn/eecs/archive/msc-2009/vmarinov.pdf'>vmarinov&#8217;s masters thesis &#8594;</a><br />(2) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/utils_8c.html'><code>merger</code> utilities &#8594;</a></p>
+</div>
+
+<div id="related">
+  <h2>Related Posts</h2>
+  <ul class="posts">
+    
+      <li><span>26 Mar 2012</span> &raquo; <a href="/2012/03/26/ungrouper-implementation">Ungrouper Implementation</a></li>
+    
+      <li><span>26 Mar 2012</span> &raquo; <a href="/2012/03/26/flexible-group-filters-and-aggregations">Flexible Group Filters and Aggregations</a></li>
+    
+      <li><span>19 Mar 2012</span> &raquo; <a href="/2012/03/19/refactoring-the-execution-engine">Refactoring the Execution Engine</a></li>
+    
+  </ul>
+</div>
+
+
+
+
+    <div class="footer">
+      <div class="contact">
+        <p>
+          Vaibhav Bajpai<br />
+          <a href='mailto:contact@vaibhavbajpai.com'>contact@vaibhavbajpai.com</a>
+        </p>
+      </div>
+      <div class="contact">
+        <p>
+          <a href="http://github.com/vbajpai/">github.com/vbajpai</a><br />
+          <a href="http://facebook.com/vaibhavbajpai/">facebook.com/vaibhavbajpai</a><br />
+        </p>
+      </div>
+      <div class="rss">
+        <a href="http://feeds.feedburner.com/feedname">
+          <img src="/assets/themes/tom/images/rss.png" alt="Subscribe to RSS Feed" />
+        </a>
+      </div>
+    </div>
+  </div>
+  <a href="http://github.com/vbajpai"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+
+  
+</body>
+</html>
+
