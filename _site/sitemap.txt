@@ -7,6 +7,7 @@ http://vbajpai.github.com/blog.nfql/pages.html
 http://vbajpai.github.com/blog.nfql/sitemap.txt
 http://vbajpai.github.com/blog.nfql/tags.html
 
+http://vbajpai.github.com/blog.nfql/2012/07/11/v25-its-verifiable
 http://vbajpai.github.com/blog.nfql/2012/06/28/python-scripts-to-automate-benchmarking
 http://vbajpai.github.com/blog.nfql/2012/06/25/sample-silk-query
 http://vbajpai.github.com/blog.nfql/2012/06/23/flow-tools-to-silk

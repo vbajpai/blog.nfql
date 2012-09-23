@@ -4,13 +4,41 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T22:01:22+02:00</updated>
+ <updated>2012-09-23T22:04:48+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>v2.5: it's verifiable</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/07/11/v25-its-verifiable"/>
+   <updated>2012-07-11T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/07/11/v25-its-verifiable</id>
+   <content type="html">&lt;p&gt;Summary: (since after &lt;code&gt;v0.4&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; git show v0.5
+
+tag v0.5
+Tagger: Vaibhav Bajpai &amp;lt;contact@vaibhavbajpai.com&amp;gt;
+Date:   Wed Jul 11 10:33:58 2012 +0200
+Commit 8d2f9b374a1e104e97398de47542cd5c0479a0dc
+
+* better engine usage on run.
+* evaluation of query ruleset lengths at RUNTIME.
+* python pipeline module to encapsulate pipeline stage classes.
+* painless parser installation using make.
+* parser installation instructions on debian/ubuntu and osx.
+* regression test-suite for the execution engine.
+* silk installation and usage instructions.
+* instructions to convert flow-tools traces to silk.
+* automated benchmarking suite.
+* resolved issues:
+  * no segfault on srcIP = dstIP in a grouper rule.
+  * no segfault when no grouper rules are defined.	&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
  
  <entry>
    <title>Python Scripts to Automate Benchmarking</title>
