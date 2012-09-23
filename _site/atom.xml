@@ -4,13 +4,124 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T16:38:14+02:00</updated>
+ <updated>2012-09-23T16:54:00+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>v2.2: it's robust</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/18/v22-its-robust"/>
+   <updated>2012-04-18T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/18/v22-its-robust</id>
+   <content type="html">&lt;p&gt;Summary: (since after &lt;code&gt;v0.1&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ git show v0.2
+
+tag v0.2
+Tagger: Vaibhav Bajpai &amp;lt;contact@vaibhavbajpai.com&amp;gt;
+Date:   Wed Apr 18 13:24:16 2012 +0200    
+Commit 2c571f80cd076172cbd00ef7f9976b88cb44b425
+
+* complete engine refactor.
+* complete engine profiling (no memory leaks).
+* issues closed:
+    - greedily deallocating non-filtered records in `O(n)` before `merger(...)`.
+    - resolved a grouper segfault when NO records got filtered.
+    - all records are grouped into 1 group when no grouping rule specified.
+    - aggregation on common fields touched by filter/grouper rules is ignored.
+    - no `uintX_t` assumptions for field offsets.
+    - rules are clubbed together and assigned using a loop.
+    - function parameters are as minimum as required.
+    - function parameters are safe using `[const]` ptr and ptr to `[const]`.
+    - lazy `rule-&amp;gt;func(...)` assignment when the stage is entered.	&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Lazy Comparator Assignments</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/18/lazy-comparator-assignments"/>
+   <updated>2012-04-18T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/18/lazy-comparator-assignments</id>
+   <content type="html">&lt;p&gt;There are dedicated comparator functions for each &lt;code&gt;uintX_t&lt;/code&gt; type of the field offset. Up until now, the choice for the function was made using a single function, &lt;code&gt;assign_fptr(...)&lt;/code&gt; (1) which was called before the start of the pipeline to ensure all function pointers point to the right functions of each stage. Here is small snippet:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;assign_fptr(struct flowquery *fquery) {
+
+  for (int i = 0; i &amp;lt; fquery-&amp;gt;num_branches; i++) {
+
+    struct branch* branch = fquery-&amp;gt;branchset[i];    
+    
+    /* for loop for the filter */
+    for (int j = 0; j &amp;lt; branch-&amp;gt;num_filter_rules; j++) {…}
+    
+    /* for loop for the grouper */
+    for (int j = 0; j &amp;lt; branch-&amp;gt;num_grouper_rules; j++) {…}    
+    
+    /* for loop for the group-aggregation */
+    for (int j = 0; j &amp;lt; branch-&amp;gt;num_aggr_rules; j++) {…}
+    
+    /* for loop for the group-filter */
+    for (int j = 0; j &amp;lt; branch-&amp;gt;num_gfilter_rules; j++) {…}	
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This function is quite computationally expensive, since it falls through a HUGE switch statement to determine the function of right type. It is not guaranteed that given the type of the query and trace, the program will eventually go through each stage of the pipeline. It is also possible that the program exits before, because there is nothing more for the next stage to compute. As such the function pointers should be SET only from within the stage for the current stage. Here is a snippet:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;assign_filter_func(struct filter_rule* const frule) {...}
+assign_grouper_func(struct grouper_rule* const grule) {...}  
+assign_aggr_func(struct aggr_rule* const arule) {...}
+assign_gfilter_func(struct gfilter_rule* const gfrule) {...}
+assign_merger_func(struct merger_rule* const mrule) {...}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Each of these functions are called from their respective stages just before when the comparison is required to be performed. As a result, we save the computation time wasted in setting the function pointer for stage X if X is never executed.&lt;/p&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/auto__assign_8c.html'&gt;&lt;code&gt;auto_assign&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Flexible Grouper</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/18/flexible-grouper"/>
+   <updated>2012-04-18T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/18/flexible-grouper</id>
+   <content type="html">&lt;p&gt;The &lt;code&gt;grouper(...)&lt;/code&gt; (1) call was plagued with hardcoded &lt;code&gt;uint32_t&lt;/code&gt; type assumption on the field offset being used to make grouper rule comparisons. The function now internally calls &lt;code&gt;get_gtype(...)&lt;/code&gt; to fall through a switch case to determine the type of the field offset at RUNTIME. Here is a snippet:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct grouper_type* get_gtype(uint64_t op) { 
+  ...
+  switch (op) {
+  
+    case RULE_S2_8:
+      gtype-&amp;gt;qsort_comp = comp_uint8_t;
+      gtype-&amp;gt;bsearch = bsearch_uint8_t;
+      gtype-&amp;gt;alloc_uniqresult = alloc_uniqresult_uint8_t;
+      gtype-&amp;gt;get_uniq_record = get_uniq_record_uint8_t;      
+      gtype-&amp;gt;dealloc_uniqresult = dealloc_uniqresult_uint8_t;
+
+      break;
+    case RULE_S2_16:
+      ...
+      break;
+      
+    case RULE_S2_32:
+      ...
+      break;
+      
+    case RULE_S2_64:
+      ...
+      break;
+  }
+  return gtype;
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At this point I do not think I have any assumptions on any field offset for any pipeline stage. As such experimentation on different style of queries should now work and is the next item on the list to investigate.&lt;/p&gt;
+
+&lt;p&gt;Resources:&lt;/p&gt;
+
+&lt;p&gt;(1) &lt;a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8h_source.html'&gt;&lt;code&gt;grouper&lt;/code&gt; reference &amp;#8594;&lt;/a&gt;&lt;/p&gt;</content>
+ </entry>
  
  <entry>
    <title>Few Closed Issues</title>

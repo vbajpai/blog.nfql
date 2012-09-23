@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Debugging the Execution Engine</title>
+   <title>Flexible Grouper</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,62 +26,45 @@
 
     
 <div id="post">
-  <h1>Debugging the Execution Engine</h1>
+  <h1>Flexible Grouper</h1>
   <p class="meta">
-    27 February 2012 
+    18 April 2012 
     
   </p>
-  <p>Debugging the execution engine.</p>
+  <p>The <code>grouper(...)</code> (1) call was plagued with hardcoded <code>uint32_t</code> type assumption on the field offset being used to make grouper rule comparisons. The function now internally calls <code>get_gtype(...)</code> to fall through a switch case to determine the type of the field offset at RUNTIME. Here is a snippet:</p>
 
-<ul>
-<li>Added a <s>`DEBUGENGINE` macro</s> <code>debug bool</code> in <code>base_header.h</code> (1)</li>
-</ul>
-
-<p>Changes in <code>ftreader</code> (2)</p>
-
-<ul>
-<li>Added <code>ftio_check_xfield(…)</code> to check the proper format before retrieving the xfield using <code>ftio_xfield(…)</code></li>
-
-<li>Added <code>flow_print_record(…)</code> to print the flow-records.</li>
-
-<li><code>ftreader</code> now prints the read trace in a <code>flow-print-f5</code> format when <code>DEBUGENGINE</code> is set.</li>
-</ul>
-
-<p>Changes in <code>pipeline</code> (3)</p>
-
-<ul>
-<li>
-<p>Saving pointers to the filtered records when <code>DEBUGENGINE</code> is set.</p>
-
-<pre><code>struct branch_info {
-  
-  /* have to be filled manually */
+<pre><code>struct grouper_type* get_gtype(uint64_t op) { 
   ...
+  switch (op) {
   
-#ifdef DEBUGENGINE
-  char** filtered_records;
-  size_t num_filtered_records;  
-#endif
-  
-  /* will be filled by individual branches */
-  ...
-};</code></pre>
-</li>
-</ul>
+    case RULE_S2_8:
+      gtype-&gt;qsort_comp = comp_uint8_t;
+      gtype-&gt;bsearch = bsearch_uint8_t;
+      gtype-&gt;alloc_uniqresult = alloc_uniqresult_uint8_t;
+      gtype-&gt;get_uniq_record = get_uniq_record_uint8_t;      
+      gtype-&gt;dealloc_uniqresult = dealloc_uniqresult_uint8_t;
 
-<p>Changes in <code>flowy</code> (4)</p>
+      break;
+    case RULE_S2_16:
+      ...
+      break;
+      
+    case RULE_S2_32:
+      ...
+      break;
+      
+    case RULE_S2_64:
+      ...
+      break;
+  }
+  return gtype;
+}</code></pre>
 
-<ul>
-<li>Added a bunch load of code comments to describe the flow.</li>
+<p>At this point I do not think I have any assumptions on any field offset for any pipeline stage. As such experimentation on different style of queries should now work and is the next item on the list to investigate.</p>
 
-<li>Added separate macros for each stage of the pipeline for now, until the segfault is resolved.</li>
+<p>Resources:</p>
 
-<li>Printing the filtered flow-records when the <s>`DEBUGENGINE`</s> <code>--debug</code> is set.</li>
-</ul>
-
-<p>Resources -</p>
-
-<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/base__header_8h.html'><code>base_header</code> reference &#8594;</a><br />(2) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/ftreader_8c.html'><code>ftreader</code> reference &#8594;</a> <br />(3) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/pipeline_8h.html'><code>pipeline</code> reference &#8594;</a><br />(4) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/flowy_8c.html'><code>flowy</code> reference &#8594;</a></p>
+<p>(1) <a href='http://dl.dropbox.com/u/500389/mthesis/docs-engine/html/grouper_8h_source.html'><code>grouper</code> reference &#8594;</a></p>
 </div>
 
 <div id="related">
@@ -92,7 +75,7 @@
     
       <li><span>18 Apr 2012</span> &raquo; <a href="/2012/04/18/lazy-comparator-assignments">Lazy Comparator Assignments</a></li>
     
-      <li><span>18 Apr 2012</span> &raquo; <a href="/2012/04/18/flexible-grouper">Flexible Grouper</a></li>
+      <li><span>11 Apr 2012</span> &raquo; <a href="/2012/04/11/few-closed-issues">Few Closed Issues</a></li>
     
   </ul>
 </div>
