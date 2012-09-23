@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>flow tools on AMD64</title>
+   <title>Graceful Exits on Failure</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,51 +26,70 @@
 
     
 <div id="post">
-  <h1>flow tools on AMD64</h1>
+  <h1>Graceful Exits on Failure</h1>
   <p class="meta">
-    12 March 2012 
+    22 April 2012 
     
   </p>
-  <p>The <code>START</code> and <code>END</code> timestamps on pretty-print are emitting garbage values.</p>
+  <p>using glibc <code>backtrace(...)</code> to print the stack trace on <code>errExit(...)</code></p>
 
-<pre><code>$ flow-cat traces.ft | flow-print -f 5
+<pre><code>&gt;&gt; bin/engine foo bar
+ERROR: open
 
-Start             End                ...
-0309.03:21:34.835 0309.03:21:34.835  ...
-0107.18:47:30.422 0107.18:47:30.422  ...
-0825.21:13:44.389 0720.19:49:18.819  ...
-0627.22:48:48.456 0627.22:48:48.456  ...
-0502.00:22:40.523 0502.00:22:40.523  ...
-0305.12:08:28.306 0131.20:53:46.834  ...</code></pre>
+Stack Trace: 
+0   engine                              0x000000010bc891c2 print_trace + 34
+1   engine                              0x000000010bc893cb errExit + 395
+2   engine                              0x000000010bc898de read_param_data + 174
+3   engine                              0x000000010bc8c600 main + 80
+4   engine                              0x000000010bc6e054 start + 52</code></pre>
 
-<p>It turns out the original <code>flow-tools v0.68</code> (1) does not work well with <code>AMD64</code> (2). There is an active forked project of original <code>flow-tools</code> (3) that works on 64-bit systems.</p>
+<p>gracefully exiting when the trace cannot be read/parsed.</p>
 
-<p>Installing <a href='https://github.com/downloads/vbajpai/mthesis-src/flow-tools-0.68.4.tar.bz2'>flow-tools 0.68.4 &#8594;</a></p>
+<pre><code>&gt;&gt; bin/engine examples/query-http-tcp-session.json foo
+ERROR: open	
 
-<pre><code>$ ./configure &amp;&amp; make &amp;&amp; make install
-$ flow-cat traces.ft | flow-print -f 5
+Stack Trace: 
+...
 
-Start             End                ...
-1207.23:58:54.835 1207.23:58:54.835  ...
-1207.23:58:58.422 1207.23:58:58.422  ...
-1207.23:58:00.389 1207.23:58:54.819  ...
-1207.23:59:12.456 1207.23:59:12.456  ...
-1207.23:59:12.523 1207.23:59:12.523  ...</code></pre>
+&gt;&gt; sudo cat /boot/vmlinuz-3.2.0-23-generic | \
+   bin/engine examples/query-http-tcp-session.json -
 
-<p>and now the engine also spits out timestamps in correct order:</p>
+: ftiheader_read(): Warning, bad magic number
+: ftiheader_read(): failed
+ERROR: ftio_init(...)
 
-<pre><code>[engine] $ ./flowy-engine --debug traces-long.ft query.json
+Stack Trace: 
+...</code></pre>
 
-Start             End                ...
-1207.23:58:54.835 1207.23:58:54.835  ...
-1207.23:58:58.422 1207.23:58:58.422  ...
-1207.23:58:00.389 1207.23:58:54.819  ...
-1207.23:59:12.456 1207.23:59:12.456  ...
-1207.23:59:12.523 1207.23:59:12.523  ...</code></pre>
+<p>gracefully exiting when the <code>JSON</code> query cannot be read/parsed.</p>
 
-<p>Resources:</p>
+<pre><code>&gt;&gt; bin/engine examples/trace.ft examples/trace.ft
+ERROR: json_tokener_parse_ex(...)
 
-<p>(1) <a href='http://www.splintered.net/sw/flow-tools'>original flow-tools &#8594;</a><br />(2) <a href='http://ensight.eos.nasa.gov/FlowViewer/faq.html#14'>flow-tools on AMD64 FAQ by FlowViewer &#8594;</a><br />(3) <a href='http://code.google.com/p/flow-tools/'>forked flow-tools &#8594;</a></p>
+Stack Trace: 
+...</code></pre>
+
+<p>branch thread returns <code>EXIT_FAILURE</code> if either stage returns <code>NULL</code></p>
+
+<pre><code>branch-&gt;filter_result = filter(...);	
+if (branch-&gt;filter_result == NULL)
+  pthread_exit((void*)EXIT_FAILURE);
+  
+branch-&gt;grouper_result = grouper(...);
+if (branch-&gt;grouper_result == NULL)
+  pthread_exit((void*)EXIT_FAILURE);
+
+branch-&gt;gfilter_result = groupfilter(...);
+if (branch-&gt;gfilter_result == NULL)
+  pthread_exit((void*)EXIT_FAILURE);</code></pre>
+
+<p>branch thread returns <code>EXIT_SUCCESS</code> on normal exit</p>
+
+<pre><code>void *
+branch_start(void *arg) {	  
+  ...
+  pthread_exit((void*)EXIT_SUCCESS);
+}</code></pre>
 </div>
 
 <div id="related">
@@ -79,9 +98,9 @@ Start             End                ...
     
       <li><span>24 Apr 2012</span> &raquo; <a href="/2012/04/24/flexible-stages">Flexible Stages</a></li>
     
-      <li><span>22 Apr 2012</span> &raquo; <a href="/2012/04/22/graceful-exits-on-failure">Graceful Exits on Failure</a></li>
-    
       <li><span>20 Apr 2012</span> &raquo; <a href="/2012/04/20/reading-multiple-traces-from-stdin">Reading Multiple Traces from stdin</a></li>
+    
+      <li><span>18 Apr 2012</span> &raquo; <a href="/2012/04/18/v22-its-robust">v2.2: it's robust</a></li>
     
   </ul>
 </div>

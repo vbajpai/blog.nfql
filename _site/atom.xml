@@ -4,13 +4,143 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T16:54:00+02:00</updated>
+ <updated>2012-09-23T19:24:59+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Flexible Stages</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/24/flexible-stages"/>
+   <updated>2012-04-24T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/24/flexible-stages</id>
+   <content type="html">&lt;p&gt;&lt;code&gt;grouper(...)&lt;/code&gt; and &lt;code&gt;groupfilter(...)&lt;/code&gt; only proceed when previous stage returned something.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/* grouper */
+struct grouper_result*
+grouper(...) {
+
+  /* go ahead if there is something to group */
+  if (fresult-&amp;gt;num_filtered_records &amp;gt; 0) {...}    
+}
+
+/* group filter */
+struct groupfilter_result*
+groupfilter(...) {
+
+  /* go ahead if there is something to group filter */
+  for (int i = 0, j = 0; i &amp;lt; gresult-&amp;gt;num_groups; i++) {...}
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;merger(...)&lt;/code&gt; proceeds only when every branch has non-zero filtered groups. This is achieved using the iterator. &lt;code&gt;iter_init(...)&lt;/code&gt; deallocates and returns &lt;code&gt;NULL&lt;/code&gt; if any one branch has 0 filtered groups. Consequently a check is performed in the &lt;code&gt;merger(...)&lt;/code&gt; to make sure &lt;code&gt;iter&lt;/code&gt; is NOT &lt;code&gt;NULL&lt;/code&gt;before proceeding.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/* merger */
+struct merger_result*
+merger(...) {
+
+  /* initialize the iterator */
+  struct permut_iter* iter = iter_init(num_branches, branchset);
+  if (iter == NULL)
+    return mresult;
+  ...
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As a result, some issues were resolved and closed -&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;merger segfault when &lt;code&gt;num_filtered_records&lt;/code&gt; for either branch is 0&lt;/li&gt;
+
+&lt;li&gt;merger segfault when &lt;code&gt;num_filtered_groups&lt;/code&gt; in either branch is 0&lt;/li&gt;
+&lt;/ul&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Graceful Exits on Failure</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/22/graceful-exits-on-failure"/>
+   <updated>2012-04-22T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/22/graceful-exits-on-failure</id>
+   <content type="html">&lt;p&gt;using glibc &lt;code&gt;backtrace(...)&lt;/code&gt; to print the stack trace on &lt;code&gt;errExit(...)&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; bin/engine foo bar
+ERROR: open
+
+Stack Trace: 
+0   engine                              0x000000010bc891c2 print_trace + 34
+1   engine                              0x000000010bc893cb errExit + 395
+2   engine                              0x000000010bc898de read_param_data + 174
+3   engine                              0x000000010bc8c600 main + 80
+4   engine                              0x000000010bc6e054 start + 52&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;gracefully exiting when the trace cannot be read/parsed.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; bin/engine examples/query-http-tcp-session.json foo
+ERROR: open	
+
+Stack Trace: 
+...
+
+&amp;gt;&amp;gt; sudo cat /boot/vmlinuz-3.2.0-23-generic | \
+   bin/engine examples/query-http-tcp-session.json -
+
+: ftiheader_read(): Warning, bad magic number
+: ftiheader_read(): failed
+ERROR: ftio_init(...)
+
+Stack Trace: 
+...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;gracefully exiting when the &lt;code&gt;JSON&lt;/code&gt; query cannot be read/parsed.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; bin/engine examples/trace.ft examples/trace.ft
+ERROR: json_tokener_parse_ex(...)
+
+Stack Trace: 
+...&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;branch thread returns &lt;code&gt;EXIT_FAILURE&lt;/code&gt; if either stage returns &lt;code&gt;NULL&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;branch-&amp;gt;filter_result = filter(...);	
+if (branch-&amp;gt;filter_result == NULL)
+  pthread_exit((void*)EXIT_FAILURE);
+  
+branch-&amp;gt;grouper_result = grouper(...);
+if (branch-&amp;gt;grouper_result == NULL)
+  pthread_exit((void*)EXIT_FAILURE);
+
+branch-&amp;gt;gfilter_result = groupfilter(...);
+if (branch-&amp;gt;gfilter_result == NULL)
+  pthread_exit((void*)EXIT_FAILURE);&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;branch thread returns &lt;code&gt;EXIT_SUCCESS&lt;/code&gt; on normal exit&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void *
+branch_start(void *arg) {	  
+  ...
+  pthread_exit((void*)EXIT_SUCCESS);
+}&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Reading Multiple Traces from stdin</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/04/20/reading-multiple-traces-from-stdin"/>
+   <updated>2012-04-20T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/04/20/reading-multiple-traces-from-stdin</id>
+   <content type="html">&lt;p&gt;The engine can now read traces from &lt;code&gt;stdin&lt;/code&gt;.&lt;br /&gt;This means, now we can concatenate multiple traces using &lt;code&gt;flow-cat&lt;/code&gt; and then pipe them in to the engine for processing -&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;flow-cat $TRACE[s] | bin/engine $QUERY -&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A typical query to find all the HTTP (over TCP) sessions for April resulted in 285 streams and took around 2 minutes.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; time flow-cat /Netflow/ft-data/2012/2012-04 | \
+   bin/engine examples/query-http-tcp-session.json -
+
+No. of Streams: 285
+--------------- 
+...&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
  
  <entry>
    <title>v2.2: it's robust</title>

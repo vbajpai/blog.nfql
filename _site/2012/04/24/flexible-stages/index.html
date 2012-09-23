@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>flow tools on AMD64</title>
+   <title>Flexible Stages</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,62 +26,60 @@
 
     
 <div id="post">
-  <h1>flow tools on AMD64</h1>
+  <h1>Flexible Stages</h1>
   <p class="meta">
-    12 March 2012 
+    24 April 2012 
     
   </p>
-  <p>The <code>START</code> and <code>END</code> timestamps on pretty-print are emitting garbage values.</p>
+  <p><code>grouper(...)</code> and <code>groupfilter(...)</code> only proceed when previous stage returned something.</p>
 
-<pre><code>$ flow-cat traces.ft | flow-print -f 5
+<pre><code>/* grouper */
+struct grouper_result*
+grouper(...) {
 
-Start             End                ...
-0309.03:21:34.835 0309.03:21:34.835  ...
-0107.18:47:30.422 0107.18:47:30.422  ...
-0825.21:13:44.389 0720.19:49:18.819  ...
-0627.22:48:48.456 0627.22:48:48.456  ...
-0502.00:22:40.523 0502.00:22:40.523  ...
-0305.12:08:28.306 0131.20:53:46.834  ...</code></pre>
+  /* go ahead if there is something to group */
+  if (fresult-&gt;num_filtered_records &gt; 0) {...}    
+}
 
-<p>It turns out the original <code>flow-tools v0.68</code> (1) does not work well with <code>AMD64</code> (2). There is an active forked project of original <code>flow-tools</code> (3) that works on 64-bit systems.</p>
+/* group filter */
+struct groupfilter_result*
+groupfilter(...) {
 
-<p>Installing <a href='https://github.com/downloads/vbajpai/mthesis-src/flow-tools-0.68.4.tar.bz2'>flow-tools 0.68.4 &#8594;</a></p>
+  /* go ahead if there is something to group filter */
+  for (int i = 0, j = 0; i &lt; gresult-&gt;num_groups; i++) {...}
+}</code></pre>
 
-<pre><code>$ ./configure &amp;&amp; make &amp;&amp; make install
-$ flow-cat traces.ft | flow-print -f 5
+<p><code>merger(...)</code> proceeds only when every branch has non-zero filtered groups. This is achieved using the iterator. <code>iter_init(...)</code> deallocates and returns <code>NULL</code> if any one branch has 0 filtered groups. Consequently a check is performed in the <code>merger(...)</code> to make sure <code>iter</code> is NOT <code>NULL</code>before proceeding.</p>
 
-Start             End                ...
-1207.23:58:54.835 1207.23:58:54.835  ...
-1207.23:58:58.422 1207.23:58:58.422  ...
-1207.23:58:00.389 1207.23:58:54.819  ...
-1207.23:59:12.456 1207.23:59:12.456  ...
-1207.23:59:12.523 1207.23:59:12.523  ...</code></pre>
+<pre><code>/* merger */
+struct merger_result*
+merger(...) {
 
-<p>and now the engine also spits out timestamps in correct order:</p>
+  /* initialize the iterator */
+  struct permut_iter* iter = iter_init(num_branches, branchset);
+  if (iter == NULL)
+    return mresult;
+  ...
+}</code></pre>
 
-<pre><code>[engine] $ ./flowy-engine --debug traces-long.ft query.json
+<p>As a result, some issues were resolved and closed -</p>
 
-Start             End                ...
-1207.23:58:54.835 1207.23:58:54.835  ...
-1207.23:58:58.422 1207.23:58:58.422  ...
-1207.23:58:00.389 1207.23:58:54.819  ...
-1207.23:59:12.456 1207.23:59:12.456  ...
-1207.23:59:12.523 1207.23:59:12.523  ...</code></pre>
+<ul>
+<li>merger segfault when <code>num_filtered_records</code> for either branch is 0</li>
 
-<p>Resources:</p>
-
-<p>(1) <a href='http://www.splintered.net/sw/flow-tools'>original flow-tools &#8594;</a><br />(2) <a href='http://ensight.eos.nasa.gov/FlowViewer/faq.html#14'>flow-tools on AMD64 FAQ by FlowViewer &#8594;</a><br />(3) <a href='http://code.google.com/p/flow-tools/'>forked flow-tools &#8594;</a></p>
+<li>merger segfault when <code>num_filtered_groups</code> in either branch is 0</li>
+</ul>
 </div>
 
 <div id="related">
   <h2>Related Posts</h2>
   <ul class="posts">
     
-      <li><span>24 Apr 2012</span> &raquo; <a href="/2012/04/24/flexible-stages">Flexible Stages</a></li>
-    
       <li><span>22 Apr 2012</span> &raquo; <a href="/2012/04/22/graceful-exits-on-failure">Graceful Exits on Failure</a></li>
     
       <li><span>20 Apr 2012</span> &raquo; <a href="/2012/04/20/reading-multiple-traces-from-stdin">Reading Multiple Traces from stdin</a></li>
+    
+      <li><span>18 Apr 2012</span> &raquo; <a href="/2012/04/18/v22-its-robust">v2.2: it's robust</a></li>
     
   </ul>
 </div>

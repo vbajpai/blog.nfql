@@ -7,6 +7,9 @@ http://vbajpai.github.com/blog.nfql/pages.html
 http://vbajpai.github.com/blog.nfql/sitemap.txt
 http://vbajpai.github.com/blog.nfql/tags.html
 
+http://vbajpai.github.com/blog.nfql/2012/04/24/flexible-stages
+http://vbajpai.github.com/blog.nfql/2012/04/22/graceful-exits-on-failure
+http://vbajpai.github.com/blog.nfql/2012/04/20/reading-multiple-traces-from-stdin
 http://vbajpai.github.com/blog.nfql/2012/04/18/v22-its-robust
 http://vbajpai.github.com/blog.nfql/2012/04/18/lazy-comparator-assignments
 http://vbajpai.github.com/blog.nfql/2012/04/18/flexible-grouper
