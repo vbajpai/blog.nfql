@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Flexible Stages</title>
+   <title>Sample SiLK Query</title>
    <meta name="author" content="Vaibhav Bajpai" />
    <link href="http://feeds.feedburner.com/feedname" rel="alternate" title="your title" type="application/atom+xml" />
 
@@ -26,49 +26,37 @@
 
     
 <div id="post">
-  <h1>Flexible Stages</h1>
+  <h1>Sample SiLK Query</h1>
   <p class="meta">
-    24 April 2012 
+    25 June 2012 
     
   </p>
-  <p><code>grouper(...)</code> and <code>groupfilter(...)</code> only proceed when previous stage returned something.</p>
+  <p>A sample <code>SiLK</code> query to imitate the functionality of <code>NFQL</code> is given below. Additional <code>SiLK</code> queries and example traces are available in <code>examples/silk/</code></p>
 
-<pre><code>/* grouper */
-struct grouper_result*
-grouper(...) {
+<h2 id='http_tcp_session'>HTTP TCP Session</h2>
+<hr />
+<p>Filter:</p>
 
-  /* go ahead if there is something to group */
-  if (fresult-&gt;num_filtered_records &gt; 0) {...}    
-}
+<pre><code>&gt;&gt; rwfilter --sport=80 --proto=6 --pass=sport80.raw 100K.rwf.gz
+&gt;&gt; rwfilter --dport=80 --proto=6 --pass=dport80.raw 100K.rwf.gz	</code></pre>
 
-/* group filter */
-struct groupfilter_result*
-groupfilter(...) {
+<p>Grouper:</p>
 
-  /* go ahead if there is something to group filter */
-  for (int i = 0, j = 0; i &lt; gresult-&gt;num_groups; i++) {...}
-}</code></pre>
+<pre><code>&gt;&gt; rwsort --fields=sIP,dIP dport80.raw | \ 
+   rwgroup --id-fields=sIP,dIP --summarize &gt; dport80group.raw
 
-<p><code>merger(...)</code> proceeds only when every branch has non-zero filtered groups. This is achieved using the iterator. <code>iter_init(...)</code> deallocates and returns <code>NULL</code> if any one branch has 0 filtered groups. Consequently a check is performed in the <code>merger(...)</code> to make sure <code>iter</code> is NOT <code>NULL</code>before proceeding.</p>
+&gt;&gt; rwsort --fields=sIP,dIP sport80.raw | \
+   rwgroup --id-fields=sIP,dIP --summarize &gt; sport80group.raw	</code></pre>
 
-<pre><code>/* merger */
-struct merger_result*
-merger(...) {
+<p>Group Filter:</p>
 
-  /* initialize the iterator */
-  struct permut_iter* iter = iter_init(num_branches, branchset);
-  if (iter == NULL)
-    return mresult;
-  ...
-}</code></pre>
+<pre><code>&gt;&gt; rwfilter sport80group.raw --pass=sport80gfilter.raw --packets=200-
+&gt;&gt; rwfilter dport80group.raw --pass=dport80gfilter.raw --packets=200-</code></pre>
 
-<p>As a result, some issues were resolved and closed -</p>
+<p>Merger:</p>
 
-<ul>
-<li>merger segfault when <code>num_filtered_records</code> for either branch is 0</li>
-
-<li>merger segfault when <code>num_filtered_groups</code> in either branch is 0</li>
-</ul>
+<pre><code>&gt;&gt; rwmatch --relate=1,2 --relate=2,1 \
+   sport80gfilter.raw dport80gfilter.raw http-tcp-session.raw</code></pre>
 </div>
 
 <div id="related">
@@ -77,9 +65,9 @@ merger(...) {
     
       <li><span>28 Jun 2012</span> &raquo; <a href="/2012/06/28/python-scripts-to-automate-benchmarking">Python Scripts to Automate Benchmarking</a></li>
     
-      <li><span>25 Jun 2012</span> &raquo; <a href="/2012/06/25/sample-silk-query">Sample SiLK Query</a></li>
-    
       <li><span>23 Jun 2012</span> &raquo; <a href="/2012/06/23/flow-tools-to-silk">flow tools to SiLK</a></li>
+    
+      <li><span>20 Jun 2012</span> &raquo; <a href="/2012/06/20/installing-silk">Installing SiLK</a></li>
     
   </ul>
 </div>

@@ -4,13 +4,88 @@
  <title>NFQL</title>
  <link href="http://vbajpai.github.com/blog.nfql/atom.xml" rel="self"/>
  <link href="http://vbajpai.github.com/blog.nfql"/>
- <updated>2012-09-23T21:49:57+02:00</updated>
+ <updated>2012-09-23T22:01:22+02:00</updated>
  <id>http://vbajpai.github.com/blog.nfql</id>
  <author>
    <name>Vaibhav Bajpai</name>
    <email>contact@vaibhavbajpai.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Python Scripts to Automate Benchmarking</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/28/python-scripts-to-automate-benchmarking"/>
+   <updated>2012-06-28T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/28/python-scripts-to-automate-benchmarking</id>
+   <content type="html">&lt;hr /&gt;
+&lt;p&gt;Requirements: Python 2.7+&lt;/p&gt;
+
+&lt;p&gt;To run the &lt;code&gt;NFQL&lt;/code&gt; benchmarks:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] $ make
+[engine] $ sudo benchmarks/nfql.py bin/engine trace[s]/ querie[s]/
+benchmarking nfql ...
+executing: [bin/engine query-dns-udp trace-2012]:  1 ... 10 (0.874602 secs)
+executing: [bin/engine query-dns-udp trace-2009]:  1 ... 10 (0.028223 secs)
+...	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Example &lt;code&gt;NFQL&lt;/code&gt; traces and queries are provided in &lt;code&gt;examples/&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;To run the &lt;code&gt;SiLK&lt;/code&gt; benchmarks:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[engine] $ sudo benchmarks/silk.py trace[s]/ querie[s]/
+benchmarking silk ...
+executing: [silk http-octets trace-2009]:  1 ... 10 (0.135265 secs)
+executing: [silk http-octets trace-2012]:  1 ... 10 (0.175890 secs)
+...	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Example &lt;code&gt;SiLK&lt;/code&gt; traces and queries are provided in &lt;code&gt;examples/silk/&lt;/code&gt; &lt;code&gt;SiLK&lt;/code&gt; query files are simply bash commands separated by a delimiter. A HTTP TCP session &lt;code&gt;SiLK&lt;/code&gt; query file for instance is shown below:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;rm -f /tmp/A.raw /tmp/B.raw /tmp/result.raw; \
+rwfilter --sport=80 --proto=6 --pass=stdout %s | \
+rwsort --fields=sIP,dIP | \
+rwgroup --id-fields=sIP,dIP --summarize | \
+rwfilter --input-pipe=stdin --pass=/tmp/A.raw --packets=200-; \
+rwfilter --dport=80 --proto=6 --pass=stdout %s | \
+rwsort --fields=sIP,dIP | \
+rwgroup --id-fields=sIP,dIP --summarize | \
+rwfilter --input-pipe=stdin --pass=/tmp/B.raw --packets=200-; \
+rwmatch --relate=1,2 --relate=2,1 \
+/tmp/A.raw /tmp/B.raw /tmp/result.raw;&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Sample SiLK Query</title>
+   <link href="http://vbajpai.github.com/blog.nfql/2012/06/25/sample-silk-query"/>
+   <updated>2012-06-25T00:00:00+02:00</updated>
+   <id>http://vbajpai.github.com/blog.nfql/2012/06/25/sample-silk-query</id>
+   <content type="html">&lt;p&gt;A sample &lt;code&gt;SiLK&lt;/code&gt; query to imitate the functionality of &lt;code&gt;NFQL&lt;/code&gt; is given below. Additional &lt;code&gt;SiLK&lt;/code&gt; queries and example traces are available in &lt;code&gt;examples/silk/&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id='http_tcp_session'&gt;HTTP TCP Session&lt;/h2&gt;
+&lt;hr /&gt;
+&lt;p&gt;Filter:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwfilter --sport=80 --proto=6 --pass=sport80.raw 100K.rwf.gz
+&amp;gt;&amp;gt; rwfilter --dport=80 --proto=6 --pass=dport80.raw 100K.rwf.gz	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Grouper:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwsort --fields=sIP,dIP dport80.raw | \ 
+   rwgroup --id-fields=sIP,dIP --summarize &amp;gt; dport80group.raw
+
+&amp;gt;&amp;gt; rwsort --fields=sIP,dIP sport80.raw | \
+   rwgroup --id-fields=sIP,dIP --summarize &amp;gt; sport80group.raw	&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Group Filter:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwfilter sport80group.raw --pass=sport80gfilter.raw --packets=200-
+&amp;gt;&amp;gt; rwfilter dport80group.raw --pass=dport80gfilter.raw --packets=200-&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Merger:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; rwmatch --relate=1,2 --relate=2,1 \
+   sport80gfilter.raw dport80gfilter.raw http-tcp-session.raw&lt;/code&gt;&lt;/pre&gt;</content>
+ </entry>
  
  <entry>
    <title>flow tools to SiLK</title>
