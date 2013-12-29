@@ -20,63 +20,63 @@ The order of arguments of `qsort_r(...)` apparantely are different on `glibc` an
 
 `glibc:`
 
-    extern void qsort_r (
-                          void *__base, 
-                          size_t __nmemb, 
-                          size_t __size,
-                          __compar_d_fn_t __compar, 
-                          void *__arg) __nonnull ((1, 4)
-                        );
+      extern void qsort_r (
+                            void *__base, 
+                            size_t __nmemb, 
+                            size_t __size,
+                            __compar_d_fn_t __compar, 
+                            void *__arg) __nonnull ((1, 4)
+                          );
 
 `BSD:`
 
-    void qsort_r (
-                   void *base, 
-                   size_t nel, 
-                   size_t width, 
-                   void *thunk,
-                   int (*compar)(void *, const void *, const void *)
-                 );
+      void qsort_r (
+                     void *base, 
+                     size_t nel, 
+                     size_t width, 
+                     void *thunk,
+                     int (*compar)(void *, const void *, const void *)
+                   );
 
 The invocation of `qsort_r(...)` (3) was wrapped around platform specific MACROS.
 
-	+#if defined(__APPLE__) || defined(__FreeBSD__)
-        qsort_r (
-                  sorted_recordset_ref, 
-                  num_filtered_records, 
-                  sizeof(char **), 
-                  (void*)&grouper_ruleset[0]->field_offset2,
-                  gtype->qsort_comp
-                );
+    +#if defined(__APPLE__) || defined(__FreeBSD__)
+          qsort_r (
+                    sorted_recordset_ref, 
+                    num_filtered_records, 
+                    sizeof(char **), 
+                    (void*)&grouper_ruleset[0]->field_offset2,
+                    gtype->qsort_comp
+                  );
 
-	+#elif defined(__linux)
-    +    qsort_r (
-    +             sorted_recordset_ref, 
-    +             num_filtered_records, 
-    +             sizeof(char **), 
-    +             gtype->qsort_comp,
-    +             (void*)&grouper_ruleset[0]->field_offset2
-    +            );
-	+#endif
+    +#elif defined(__linux)
+      +    qsort_r (
+      +             sorted_recordset_ref, 
+      +             num_filtered_records, 
+      +             sizeof(char **), 
+      +             gtype->qsort_comp,
+      +             (void*)&grouper_ruleset[0]->field_offset2
+      +            );
+    +#endif
 	
 where `gtype->qsort_comp` (3) is -
 
 
-    struct grouper_type {
+      struct grouper_type {
 
-	+#if defined (__APPLE__) || defined (__FreeBSD__)
-	   int (*qsort_comp)(
-	                     void*                           thunk,
-	                     const void*                     e1,
-	                     const void*                     e2
-	                    );
-	+#elif defined (__linux)
-	+  int (*qsort_comp)(
-	+                    const void*                     e1,
-	+                    const void*                     e2,
-	+                    void*                           thunk
-	+                   );
-	+#endif
+    +#if defined (__APPLE__) || defined (__FreeBSD__)
+       int (*qsort_comp)(
+                         void*                           thunk,
+                         const void*                     e1,
+                         const void*                     e2
+                        );
+    +#elif defined (__linux)
+    +  int (*qsort_comp)(
+    +                    const void*                     e1,
+    +                    const void*                     e2,
+    +                    void*                           thunk
+    +                   );
+    +#endif
 
 	
 Resources:
